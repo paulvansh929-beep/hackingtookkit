@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PHANTOM OS v9.0</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --acc:#00ff41;--acc2:#00cc33;--acc3:#006622;--acc4:#002211;
+  --r:#ff2222;--a:#ffaa00;--b:#00aaff;--p:#cc00ff;--c:#00ffff;
+  --bg:#000305;--bg2:rgba(0,8,0,.96);--bg3:rgba(0,20,0,.5);
+  --border:rgba(0,255,65,.25);--border2:rgba(0,255,65,.08);
+  --text:var(--acc);--text2:var(--acc2);--text3:var(--acc3);
+}
+body.theme-green{--acc:#00ff41;--acc2:#00cc33;--acc3:#006622;--acc4:#002211;--bg:#000305;--bg2:rgba(0,8,0,.96);--border:rgba(0,255,65,.25);}
+body.theme-blue{--acc:#00aaff;--acc2:#0088cc;--acc3:#004466;--acc4:#001122;--bg:#000308;--bg2:rgba(0,4,12,.96);--border:rgba(0,170,255,.25);}
+body.theme-red{--acc:#ff2222;--acc2:#cc1111;--acc3:#660000;--acc4:#220000;--bg:#050000;--bg2:rgba(10,0,0,.96);--border:rgba(255,34,34,.25);}
+body.theme-purple{--acc:#cc00ff;--acc2:#aa00cc;--acc3:#440066;--acc4:#150022;--bg:#020008;--bg2:rgba(4,0,12,.96);--border:rgba(204,0,255,.25);}
+body.theme-cyan{--acc:#00ffff;--acc2:#00cccc;--acc3:#006666;--acc4:#001a1a;--bg:#000508;--bg2:rgba(0,6,8,.96);--border:rgba(0,255,255,.25);}
+body.theme-amber{--acc:#ffaa00;--acc2:#cc8800;--acc3:#664400;--acc4:#221500;--bg:#050300;--bg2:rgba(10,5,0,.96);--border:rgba(255,170,0,.25);}
+body.theme-white{--acc:#e8ffe8;--acc2:#aaffaa;--acc3:#558855;--acc4:#1a2a1a;--bg:#040a04;--bg2:rgba(4,10,4,.96);--border:rgba(200,255,200,.2);}
+body.theme-orange{--acc:#ff6600;--acc2:#cc5500;--acc3:#663300;--acc4:#221100;--bg:#050200;--bg2:rgba(10,3,0,.96);--border:rgba(255,102,0,.25);}
+
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);}
+body{font-family:'Share Tech Mono',monospace;color:var(--acc);cursor:default;transition:background .4s;}
+
+@keyframes flicker{0%,100%{opacity:1}91%{opacity:1}92%{opacity:.82}93%{opacity:1}96%{opacity:.92}97%{opacity:1}}
+@keyframes blink{50%{opacity:0}}
+@keyframes shake{0%,100%{transform:translate(0)}20%{transform:translate(-5px,2px)}40%{transform:translate(5px,-3px)}60%{transform:translate(-3px,4px)}80%{transform:translate(4px,-2px)}}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes scandown{0%{top:0}100%{top:100%}}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes pulse-acc{from{box-shadow:0 0 4px var(--acc)}to{box-shadow:0 0 20px var(--acc),0 0 40px var(--acc)}}
+@keyframes logo-glow{from{text-shadow:0 0 20px var(--acc)}to{text-shadow:0 0 60px var(--acc),0 0 120px var(--acc)}}
+@keyframes radar-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes found-fl{from{background:rgba(255,170,0,.25)}to{background:transparent}}
+@keyframes glitch-anim{0%,88%,100%{opacity:0;transform:none}89%{opacity:1;transform:translateY(-3px) skewX(1.5deg)}90%{opacity:0}92%{opacity:.8;transform:translateY(2px) skewX(-1deg)}93%{opacity:0}}
+@keyframes lockdown-flash{0%,100%{background:rgba(255,0,0,0)}50%{background:rgba(255,0,0,.12)}}
+@keyframes count-pulse{from{transform:scale(1)}to{transform:scale(1.08)}}
+@keyframes dna-scroll{from{transform:translateY(0)}to{transform:translateY(-50%)}}
+@keyframes wv{from{transform:scaleY(.3)}to{transform:scaleY(1)}}
+@keyframes mission-appear{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
+@keyframes typewriter-cursor{50%{opacity:0}}
+@keyframes progress-glow{from{box-shadow:0 0 4px var(--acc)}to{box-shadow:0 0 12px var(--acc),0 0 24px var(--acc)}}
+
+#scanlines{position:fixed;inset:0;pointer-events:none;z-index:8000;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.05) 2px,rgba(0,0,0,.05) 4px);}
+#glitch{position:fixed;inset:0;pointer-events:none;z-index:7999;opacity:0;animation:glitch-anim 8s infinite;background:linear-gradient(transparent 40%,rgba(0,255,65,.03) 50%,transparent 60%);}
+canvas#matrix-canvas{position:fixed;inset:0;z-index:0;opacity:.07;transition:opacity .3s;}
+
+#boot{position:fixed;inset:0;background:#000;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;}
+#boot-logo{font-family:'Orbitron',monospace;font-weight:900;font-size:48px;letter-spacing:10px;color:#00ff41;text-shadow:0 0 40px #00ff41;margin-bottom:20px;animation:logo-glow 1s infinite alternate;}
+#boot-ver{font-size:10px;letter-spacing:6px;color:#006622;margin-bottom:4px;}
+#boot-sub{font-size:9px;letter-spacing:3px;color:#004411;margin-bottom:30px;}
+#boot-bar-wrap{width:320px;height:3px;background:#001a00;border:1px solid #004400;}
+#boot-bar{height:100%;background:#00ff41;box-shadow:0 0 8px #00ff41;width:0;}
+#boot-msg{font-size:9px;color:#004411;letter-spacing:2px;height:14px;margin-top:8px;}
+#boot-log{width:320px;height:80px;overflow:hidden;margin-top:10px;}
+.boot-log-line{font-size:8px;color:#003311;letter-spacing:1px;line-height:1.6;}
+.boot-log-line.ok{color:#006622;}.boot-log-line.warn{color:#664400;}
+
+#os{position:relative;z-index:1;width:100vw;height:100vh;display:none;flex-direction:column;animation:flicker 10s infinite;}
+
+#menubar{height:26px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 8px;gap:0;flex-shrink:0;backdrop-filter:blur(6px);}
+#mb-logo{font-family:'Orbitron',monospace;font-size:10px;font-weight:900;color:var(--acc);letter-spacing:3px;margin-right:14px;text-shadow:0 0 8px var(--acc);cursor:pointer;}
+.mb-item{font-size:9px;color:var(--acc3);padding:0 8px;height:26px;display:flex;align-items:center;cursor:pointer;letter-spacing:1px;position:relative;white-space:nowrap;}
+.mb-item:hover{color:var(--acc);background:var(--acc4);}
+#mb-right{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:8px;color:var(--acc3);}
+.mb-stat{display:flex;align-items:center;gap:3px;}
+.dot{width:5px;height:5px;border-radius:50%;animation:blink 1.6s infinite;}
+.dot.g{background:var(--acc);box-shadow:0 0 4px var(--acc);}
+.dot.r{background:var(--r);box-shadow:0 0 4px var(--r);}
+.dot.a{background:var(--a);box-shadow:0 0 4px var(--a);}
+#mb-clock{font-family:'Orbitron',monospace;font-size:9px;color:var(--acc);}
+
+#desktop{flex:1;display:grid;grid-template-columns:58px 1fr;overflow:hidden;position:relative;}
+
+#dock{background:rgba(0,5,0,.95);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:3px;z-index:100;overflow-y:auto;scrollbar-width:none;}
+#dock::-webkit-scrollbar{display:none;}
+.di{width:42px;height:42px;border:1px solid var(--acc4);background:var(--bg3);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;border-radius:5px;}
+.di:hover{border-color:var(--acc);background:rgba(0,40,0,.4);transform:scale(1.06);}
+.di.on{border-color:var(--acc);background:rgba(0,40,0,.5);animation:pulse-acc .8s infinite alternate;}
+.di .ie{font-size:17px;line-height:1;}
+.di .il{font-size:5.5px;color:var(--acc3);letter-spacing:.3px;margin-top:2px;text-align:center;}
+.di:hover .il{color:var(--acc);}
+.dsep{width:34px;height:1px;background:var(--border);margin:3px 0;}
+
+#workspace{position:relative;overflow:hidden;}
+
+.win{position:absolute;background:rgba(0,5,0,.97);border:1px solid var(--border);display:flex;flex-direction:column;min-width:280px;min-height:160px;box-shadow:0 0 30px rgba(0,0,0,.6),0 0 1px var(--acc4);animation:fadein .18s ease;}
+.win.focused{border-color:var(--acc);box-shadow:0 0 20px rgba(0,0,0,.8),0 0 8px var(--acc4);}
+.winbar{height:26px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 7px;gap:6px;cursor:move;flex-shrink:0;user-select:none;}
+.wbtns{display:flex;gap:4px;}
+.wb{width:10px;height:10px;border-radius:50%;border:none;cursor:pointer;flex-shrink:0;}
+.wbr{background:#ff5f57;border:1px solid #e04e4a;}.wby{background:#febc2e;border:1px solid #d6a01d;}.wbg{background:#2cc95b;border:1px solid #1aae4a;}
+.wbr:hover{background:#ff3b30;}.wby:hover{background:#ffaa00;}.wbg:hover{background:#00ff41;}
+.wtitle{flex:1;text-align:center;font-size:9px;color:var(--acc3);letter-spacing:2px;pointer-events:none;overflow:hidden;white-space:nowrap;}
+.wcontent{flex:1;overflow:hidden;display:flex;flex-direction:column;}
+
+.wchdr{padding:5px 10px;background:rgba(0,15,0,.5);border-bottom:1px solid var(--border);font-size:8px;color:var(--acc3);letter-spacing:2px;display:flex;justify-content:space-between;flex-shrink:0;}
+.wchdr.r{border-bottom-color:rgba(255,34,34,.2);color:#cc2222;}
+.wchdr.b{border-bottom-color:rgba(0,170,255,.2);color:#3399cc;}
+.wchdr.p{border-bottom-color:rgba(204,0,255,.2);color:#aa33cc;}
+.wchdr.a{border-bottom-color:rgba(255,170,0,.2);color:#cc8800;}
+.wcbody{flex:1;overflow-y:auto;padding:10px;}
+.wcbody::-webkit-scrollbar{width:2px;}
+.wcbody::-webkit-scrollbar-thumb{background:var(--acc3);}
+.pbar{height:4px;background:var(--acc4);border:1px solid var(--border);overflow:hidden;margin-top:3px;}
+.pf{height:100%;transition:width .5s;}
+.pf.g{background:var(--acc);box-shadow:0 0 4px var(--acc);}
+.pf.r{background:var(--r);box-shadow:0 0 4px var(--r);}
+.pf.a{background:var(--a);box-shadow:0 0 4px var(--a);}
+.pf.b{background:var(--b);box-shadow:0 0 4px var(--b);}
+.pf.p{background:var(--p);box-shadow:0 0 4px var(--p);}
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:8px;}
+.sb{background:rgba(0,15,0,.4);border:1px solid var(--border);padding:7px 9px;}
+.sl{font-size:7px;color:var(--acc3);letter-spacing:2px;margin-bottom:2px;}
+.sv{font-size:15px;color:var(--acc);font-family:'Orbitron',monospace;}
+.sv.r{color:var(--r);}.sv.a{color:var(--a);}.sv.b{color:var(--b);}
+.abtn{background:var(--acc4);border:1px solid var(--acc3);color:var(--acc2);font-family:'Share Tech Mono',monospace;font-size:9px;padding:5px 12px;cursor:pointer;letter-spacing:1px;transition:all .12s;}
+.abtn:hover{background:rgba(0,40,0,.6);border-color:var(--acc);color:var(--acc);text-shadow:0 0 6px var(--acc);}
+.abtn.r{border-color:#440000;color:#cc2222;background:#0a0000;}
+.abtn.r:hover{background:#1a0000;border-color:var(--r);color:var(--r);}
+.slbl{font-size:7px;color:var(--acc3);letter-spacing:3px;border-bottom:1px solid var(--border);padding-bottom:2px;margin:8px 0 5px;}
+
+/* TERMINAL */
+#tout{flex:1;overflow-y:auto;padding:7px 10px;font-size:10px;line-height:1.8;}
+#tout::-webkit-scrollbar{width:2px;}
+#tout::-webkit-scrollbar-thumb{background:var(--acc3);}
+.tl{margin:0;}.tl.c{color:var(--acc);}.tl.i{color:var(--acc2);}.tl.ok{color:#00ffaa;}.tl.w{color:var(--a);}.tl.e{color:var(--r);}.tl.d{color:var(--b);}.tl.dm{color:var(--acc4);}.tl.p{color:var(--p);}
+#tinrow{display:flex;align-items:center;gap:5px;padding:5px 10px;border-top:1px solid var(--border);background:var(--bg2);flex-shrink:0;}
+.tpr{color:var(--acc);font-size:10px;white-space:nowrap;}
+#tcmd{flex:1;background:transparent;border:none;outline:none;color:var(--acc);font-family:'Share Tech Mono',monospace;font-size:10px;caret-color:var(--acc);}
+
+/* MAP */
+#map-canvas{display:block;flex:1;width:100%;}
+#map-footer{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding:6px 10px;background:var(--bg2);border-top:1px solid var(--border);flex-shrink:0;}
+
+/* SCAN */
+.scan-wrap{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:12px;gap:10px;}
+.scan-frame{border:2px solid var(--acc);position:relative;flex-shrink:0;}
+.scan-frame::before,.scan-frame::after{content:'';position:absolute;width:14px;height:14px;}
+.scan-frame::before{top:-2px;left:-2px;border-top:3px solid var(--acc);border-left:3px solid var(--acc);}
+.scan-frame::after{bottom:-2px;right:-2px;border-bottom:3px solid var(--acc);border-right:3px solid var(--acc);}
+.sc2{position:absolute;width:14px;height:14px;}
+.sc2.tr{top:-2px;right:-2px;border-top:3px solid var(--acc);border-right:3px solid var(--acc);}
+.sc2.bl{bottom:-2px;left:-2px;border-bottom:3px solid var(--acc);border-left:3px solid var(--acc);}
+#face-scanbar{position:absolute;left:0;right:0;height:2px;background:var(--acc);box-shadow:0 0 12px var(--acc);top:0;animation:scandown 1.8s linear infinite;}
+.scan-info{text-align:center;font-size:9px;color:var(--acc2);line-height:1.9;}
+.scan-id{font-family:'Orbitron',monospace;font-size:12px;color:var(--acc);text-shadow:0 0 8px var(--acc);margin-top:5px;min-height:18px;}
+
+/* CRACK */
+#crack-stream{flex:1;overflow:hidden;font-size:9px;line-height:1.4;padding:6px 10px;}
+.cl{color:var(--acc2);opacity:.65;}.cl.found{color:var(--a);opacity:1;font-weight:bold;animation:found-fl .4s;}
+#crack-footer{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding:6px 10px;background:var(--bg2);border-top:1px solid var(--border);flex-shrink:0;}
+.cfl{font-size:7px;color:var(--acc3);letter-spacing:1px;}
+.cfv{font-size:13px;color:var(--acc);margin-top:1px;}
+
+/* WIFI */
+.wt{width:100%;border-collapse:collapse;font-size:9px;}
+.wt th{color:var(--acc3);border-bottom:1px solid var(--border);padding:3px 5px;font-size:7px;letter-spacing:2px;text-align:left;}
+.wt td{padding:4px 5px;border-bottom:1px solid var(--border2);}
+.wt tr:hover td{background:rgba(0,30,0,.3);}
+.enc{font-size:7px;padding:1px 4px;}
+.ewpa3{background:rgba(0,0,20,.5);color:var(--b);border:1px solid rgba(0,0,80,.5);}
+.ewpa2{background:rgba(0,20,0,.5);color:var(--acc);border:1px solid var(--border);}
+.eopen{background:rgba(20,0,0,.5);color:var(--r);border:1px solid rgba(80,0,0,.5);}
+
+/* SATELLITE */
+#sat-el{display:block;flex:1;width:100%;}
+#sat-footer{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;padding:6px 10px;background:var(--bg2);border-top:1px solid var(--border);flex-shrink:0;}
+
+/* RADAR */
+#radar-wrap{flex:1;display:flex;align-items:center;justify-content:center;position:relative;}
+#radar-el{display:block;}
+#radar-side{width:160px;background:var(--bg2);border-left:1px solid var(--border);padding:10px;overflow-y:auto;flex-shrink:0;}
+.radar-contact{font-size:8px;color:var(--acc2);padding:4px 6px;border-bottom:1px solid var(--border2);animation:fadein .3s;}
+.radar-contact.hostile{color:var(--r);}
+
+/* CHAT */
+.chatmsg{padding:5px 8px;margin-bottom:4px;font-size:9px;border-left:2px solid var(--acc3);background:rgba(0,12,0,.35);}
+.chatmeta{font-size:7px;color:var(--acc3);margin-bottom:1px;}
+.chattext{color:var(--acc2);}
+.chatmsg.flag{border-left-color:var(--r);background:rgba(15,0,0,.4);}
+.chatmsg.flag .chattext{color:#ff6666;}
+
+/* CRYPTO */
+.coin-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border2);font-size:9px;}
+.cn{color:var(--acc);font-family:'Orbitron',monospace;font-size:10px;}
+.cp{color:var(--a);}
+.cc{font-size:8px;}.cc.up{color:#00ffaa;}.cc.dn{color:var(--r);}
+
+/* SYSMON */
+#proc-list{font-size:8px;color:var(--acc2);line-height:2;}
+
+/* AI */
+#ai-log{flex:1;overflow-y:auto;padding:8px 10px;font-size:10px;line-height:1.9;}
+#ai-log::-webkit-scrollbar{width:2px;}
+#ai-log::-webkit-scrollbar-thumb{background:var(--acc3);}
+.ai-msg{padding:5px 8px;margin-bottom:5px;}
+.ai-msg.ai{background:rgba(0,20,0,.4);border-left:2px solid var(--acc);color:var(--acc2);}
+.ai-msg.user{background:rgba(0,30,0,.2);border-left:2px solid var(--acc3);color:var(--acc3);}
+.ai-name{font-size:7px;color:var(--acc3);letter-spacing:2px;margin-bottom:2px;}
+#ai-input-row{display:flex;gap:5px;padding:6px 10px;border-top:1px solid var(--border);background:var(--bg2);flex-shrink:0;}
+#ai-cmd{flex:1;background:transparent;border:1px solid var(--acc3);outline:none;color:var(--acc);font-family:'Share Tech Mono',monospace;font-size:10px;padding:4px 8px;caret-color:var(--acc);}
+#ai-cmd:focus{border-color:var(--acc);}
+
+/* MODULES */
+.module-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.mcard{background:rgba(0,12,0,.5);border:1px solid var(--border);padding:10px;cursor:pointer;transition:all .15s;}
+.mcard:hover{background:rgba(0,25,0,.6);border-color:var(--acc);}
+.mcard-icon{font-size:22px;margin-bottom:5px;}
+.mcard-title{font-size:9px;color:var(--acc);letter-spacing:1px;margin-bottom:3px;}
+.mcard-desc{font-size:7px;color:var(--acc3);line-height:1.6;}
+.mcard-status{font-size:7px;margin-top:4px;padding:1px 5px;display:inline-block;}
+.ms-ready{background:rgba(0,20,0,.5);color:var(--acc);border:1px solid var(--border);}
+.ms-active{background:rgba(20,10,0,.5);color:var(--a);border:1px solid rgba(255,170,0,.3);animation:blink 1s infinite;}
+
+/* CAMS */
+#cams-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px;flex:1;overflow:hidden;}
+.cam-cell{background:#000;border:1px solid var(--border);position:relative;overflow:hidden;min-height:80px;}
+.cam-canvas{display:block;width:100%;height:100%;}
+.cam-label{position:absolute;top:4px;left:6px;font-size:7px;color:var(--acc);letter-spacing:1px;background:rgba(0,0,0,.6);padding:1px 4px;}
+.cam-live{position:absolute;top:4px;right:6px;font-size:7px;color:var(--r);animation:blink .8s infinite;}
+
+/* DNA SCANNER */
+#dna-wrap{flex:1;display:flex;overflow:hidden;}
+#dna-canvas-col{flex:1;position:relative;overflow:hidden;}
+#dna-info{width:180px;background:var(--bg2);border-left:1px solid var(--border);padding:10px;overflow-y:auto;font-size:8px;}
+.dna-marker{padding:4px 0;border-bottom:1px solid var(--border2);color:var(--acc2);}
+.dna-marker span{color:var(--acc);float:right;}
+#dna-sequence{font-size:7px;color:var(--acc3);word-break:break-all;line-height:1.8;margin-top:6px;}
+
+/* VOICE INTERCEPTOR */
+#vi-canvas{display:block;width:100%;flex:1;}
+#vi-log{overflow-y:auto;height:100px;padding:6px 10px;font-size:8px;border-top:1px solid var(--border);}
+.vi-entry{padding:3px 0;border-bottom:1px solid var(--border2);color:var(--acc2);line-height:1.6;}
+.vi-entry.flagged{color:var(--r);}
+.vi-entry .vt{color:var(--acc3);font-size:7px;}
+
+/* TYPING CHALLENGE */
+#tc-wrap{flex:1;display:flex;flex-direction:column;padding:12px;gap:10px;}
+#tc-target{font-size:11px;color:var(--acc3);line-height:2;padding:10px;background:rgba(0,10,0,.5);border:1px solid var(--border);word-break:break-all;min-height:60px;}
+.tc-char{position:relative;}.tc-char.correct{color:var(--acc);}.tc-char.wrong{color:var(--r);background:rgba(255,0,0,.15);}
+.tc-char.current{border-bottom:2px solid var(--acc);animation:typewriter-cursor 1s infinite;}
+#tc-input{background:transparent;border:1px solid var(--acc3);outline:none;color:var(--acc);font-family:'Share Tech Mono',monospace;font-size:11px;padding:6px 10px;width:100%;}
+#tc-input:focus{border-color:var(--acc);}
+.tc-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+
+/* MISSION LOG */
+#ml-wrap{flex:1;display:flex;flex-direction:column;}
+#ml-list{flex:1;overflow-y:auto;padding:8px;}
+#ml-list::-webkit-scrollbar{width:2px;}
+.mission-item{border:1px solid var(--border);margin-bottom:6px;padding:8px 10px;animation:mission-appear .3s ease;}
+.mission-item.active{border-color:var(--a);background:rgba(20,15,0,.4);}
+.mission-item.complete{border-color:var(--acc);background:rgba(0,15,0,.3);}
+.mission-item.failed{border-color:var(--r);background:rgba(15,0,0,.3);}
+.mi-title{font-size:10px;color:var(--acc);margin-bottom:3px;display:flex;justify-content:space-between;}
+.mi-desc{font-size:8px;color:var(--acc3);line-height:1.6;}
+.mi-status{font-size:7px;padding:1px 6px;}
+.ms-a{background:rgba(255,170,0,.1);color:var(--a);border:1px solid rgba(255,170,0,.3);}
+.ms-c{background:rgba(0,255,65,.1);color:var(--acc);border:1px solid var(--border);}
+.ms-f{background:rgba(255,34,34,.1);color:var(--r);border:1px solid rgba(255,34,34,.3);}
+#ml-footer{padding:8px 10px;border-top:1px solid var(--border);background:var(--bg2);display:flex;gap:6px;flex-shrink:0;}
+
+/* STEGO */
+#stego-wrap{flex:1;display:flex;flex-direction:column;padding:10px;gap:8px;}
+#stego-canvas{display:block;border:1px solid var(--border);background:#000;width:100%;}
+.stego-row{display:flex;gap:6px;align-items:center;}
+.stego-inp{flex:1;background:var(--acc4);border:1px solid var(--acc3);color:var(--acc);font-family:'Share Tech Mono',monospace;font-size:9px;padding:4px 8px;outline:none;}
+.stego-inp:focus{border-color:var(--acc);}
+#stego-reveal{font-size:9px;color:var(--a);padding:6px 10px;background:rgba(20,15,0,.5);border:1px solid rgba(255,170,0,.3);min-height:28px;word-break:break-all;}
+
+/* SIGNAL TRACKER */
+#sig-canvas{display:block;flex:1;width:100%;}
+#sig-footer{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding:6px 10px;background:var(--bg2);border-top:1px solid var(--border);flex-shrink:0;}
+
+/* MODALS */
+.modal{display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.93);align-items:center;justify-content:center;}
+.modal.show{display:flex;}
+.mbox{border:2px solid var(--acc);background:#000;padding:26px 34px;text-align:center;max-width:500px;animation:fadein .2s;}
+.mbox.r{border-color:var(--r);}.mbox.a{border-color:var(--a);}
+.mtitle{font-family:'Orbitron',monospace;font-size:20px;letter-spacing:4px;margin-bottom:8px;}
+.mtitle.g{color:var(--acc);text-shadow:0 0 20px var(--acc);}
+.mtitle.r{color:var(--r);text-shadow:0 0 20px var(--r);animation:blink .4s infinite;}
+.mtitle.a{color:var(--a);text-shadow:0 0 16px var(--a);}
+.msub{font-size:9px;color:var(--acc3);letter-spacing:2px;margin-bottom:16px;line-height:1.9;}
+.mcode{font-size:8px;color:var(--acc);opacity:.35;height:50px;overflow:hidden;line-height:1.5;text-align:left;margin-bottom:14px;}
+.mbtn{background:transparent;border:1px solid;font-family:'Share Tech Mono',monospace;font-size:10px;padding:7px 20px;cursor:pointer;letter-spacing:2px;}
+.mbtn.g{border-color:var(--acc);color:var(--acc);}.mbtn.g:hover{background:var(--acc4);}
+.mbtn.r{border-color:var(--r);color:var(--r);}.mbtn.r:hover{background:#1a0000;}
+.mbtn.a{border-color:var(--a);color:var(--a);}.mbtn.a:hover{background:#1a0e00;}
+
+#lockdown-overlay{display:none;position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,.95);align-items:center;justify-content:center;flex-direction:column;gap:10px;animation:lockdown-flash 1s infinite;}
+#lockdown-overlay.show{display:flex;}
+#ld-title{font-family:'Orbitron',monospace;font-size:36px;font-weight:900;color:var(--r);letter-spacing:6px;text-shadow:0 0 30px var(--r);animation:blink .5s infinite;}
+#ld-sub{font-size:11px;color:var(--a);letter-spacing:3px;text-align:center;line-height:2;}
+#ld-count{font-size:72px;font-family:'Orbitron',monospace;color:var(--acc);text-shadow:0 0 30px var(--acc);animation:count-pulse .5s infinite alternate;}
+#ld-bar-wrap{width:300px;height:6px;background:#001a00;border:1px solid var(--acc3);margin:6px 0;}
+#ld-bar{height:100%;background:var(--r);box-shadow:0 0 8px var(--r);width:100%;transition:width .1s;}
+
+/* SETTINGS */
+#settings-panel{position:fixed;top:26px;right:0;width:280px;bottom:0;background:rgba(0,6,0,.98);border-left:1px solid var(--border);z-index:5000;transform:translateX(100%);transition:transform .25s;display:flex;flex-direction:column;}
+#settings-panel.open{transform:none;}
+#sp-header{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+#sp-title{font-family:'Orbitron',monospace;font-size:12px;color:var(--acc);letter-spacing:3px;}
+#sp-close{background:none;border:1px solid var(--acc3);color:var(--acc3);font-family:'Share Tech Mono',monospace;font-size:9px;padding:3px 8px;cursor:pointer;}
+#sp-close:hover{border-color:var(--acc);color:var(--acc);}
+#sp-body{flex:1;overflow-y:auto;padding:12px;}
+#sp-body::-webkit-scrollbar{width:2px;}
+#sp-body::-webkit-scrollbar-thumb{background:var(--acc3);}
+.sp-section{margin-bottom:18px;}
+.sp-lbl{font-size:7px;color:var(--acc3);letter-spacing:3px;border-bottom:1px solid var(--border);padding-bottom:3px;margin-bottom:8px;}
+.sp-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:9px;color:var(--acc2);}
+#theme-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:4px;}
+.theme-swatch{height:32px;border:2px solid transparent;border-radius:3px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:7px;font-family:'Share Tech Mono',monospace;letter-spacing:.5px;transition:all .15s;}
+.theme-swatch:hover{transform:scale(1.05);}.theme-swatch.active{border-color:#fff;}
+.sp-toggle{width:34px;height:16px;background:var(--acc4);border:1px solid var(--acc3);border-radius:8px;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0;}
+.sp-toggle.on{background:var(--acc3);border-color:var(--acc);}
+.sp-toggle::after{content:'';position:absolute;top:2px;left:2px;width:10px;height:10px;border-radius:50%;background:var(--acc3);transition:left .2s,background .2s;}
+.sp-toggle.on::after{left:18px;background:var(--acc);}
+.sp-slider{-webkit-appearance:none;width:100%;height:3px;background:var(--acc4);border:1px solid var(--acc3);outline:none;margin-top:4px;cursor:pointer;}
+.sp-slider::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--acc);cursor:pointer;}
+#fs-btn{width:100%;background:var(--acc4);border:1px solid var(--acc3);color:var(--acc2);font-family:'Share Tech Mono',monospace;font-size:10px;padding:8px;cursor:pointer;letter-spacing:2px;margin-bottom:6px;transition:all .15s;}
+#fs-btn:hover{background:rgba(0,40,0,.6);border-color:var(--acc);color:var(--acc);}
+#os-name-in{background:var(--acc4);border:1px solid var(--acc3);color:var(--acc);font-family:'Share Tech Mono',monospace;font-size:9px;padding:4px 8px;width:100%;outline:none;}
+#os-name-in:focus{border-color:var(--acc);}
+
+/* NOTIF */
+#notif{position:fixed;top:34px;right:8px;z-index:8500;display:flex;flex-direction:column;gap:4px;}
+.ni{background:rgba(0,10,0,.98);border:1px solid var(--border);padding:7px 12px;font-size:9px;color:var(--acc);min-width:200px;animation:fadein .2s;border-left:3px solid var(--acc);}
+.ni.r{border-color:var(--r);border-left-color:var(--r);color:var(--r);}
+.ni.a{border-color:var(--a);border-left-color:var(--a);color:var(--a);}
+.ni-t{font-size:7px;opacity:.6;margin-bottom:1px;letter-spacing:2px;}
+
+/* VOICE BAR */
+#voice-bar{position:fixed;bottom:0;left:58px;right:0;height:28px;background:rgba(0,10,0,.97);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 14px;gap:8px;font-size:9px;color:var(--acc3);z-index:200;transform:translateY(100%);transition:transform .3s;}
+#voice-bar.show{transform:none;}
+.vwave{display:flex;gap:2px;align-items:center;}
+.vw{width:2px;background:var(--acc);border-radius:1px;animation:wv .5s ease-in-out infinite alternate;}
+.vw:nth-child(1){height:4px;animation-delay:0s}.vw:nth-child(2){height:10px;animation-delay:.08s}.vw:nth-child(3){height:6px;animation-delay:.16s}.vw:nth-child(4){height:12px;animation-delay:.04s}.vw:nth-child(5){height:4px;animation-delay:.12s}
+#vtxt{color:var(--acc);}
+
+#disclaimer-box{padding:12px;border-top:1px solid var(--border);font-size:7.5px;color:var(--acc3);line-height:1.9;background:rgba(0,5,0,.5);}
+</style>
+</head>
+<body class="theme-green">
+
+<canvas id="matrix-canvas"></canvas>
+<div id="scanlines"></div>
+<div id="glitch"></div>
+
+<!-- BOOT -->
+<div id="boot">
+  <div id="boot-logo">PHANTOM OS</div>
+  <div id="boot-ver">VERSION 9.0 — CLASSIFIED BUILD</div>
+  <div id="boot-sub">CYBER OPERATIONS COMMAND PLATFORM — NEXT GEN</div>
+  <div id="boot-bar-wrap"><div id="boot-bar"></div></div>
+  <div id="boot-msg"></div>
+  <div id="boot-log"></div>
+</div>
+
+<!-- MODALS -->
+<div class="modal" id="m-access">
+  <div class="mbox">
+    <div class="mtitle g">✓ ACCESS GRANTED</div>
+    <div class="msub" id="m-access-sub">SYSTEM INFILTRATED — FULL ROOT PRIVILEGES</div>
+    <div class="mcode" id="m-access-code"></div>
+    <button class="mbtn g" onclick="closeModal('m-access')">[ CONTINUE MISSION ]</button>
+  </div>
+</div>
+<div class="modal" id="m-breach">
+  <div class="mbox r">
+    <div class="mtitle r">⚠ SYSTEM BREACH ⚠</div>
+    <div class="msub">UNAUTHORIZED INTRUSION — FIREWALL BYPASSED</div>
+    <div id="bc-count" style="font-size:64px;font-family:'Orbitron',monospace;color:var(--acc);text-shadow:0 0 30px var(--acc);margin:6px 0;">5</div>
+    <div class="mcode" id="bc-code"></div>
+    <div id="bc-granted" style="font-family:'Orbitron',monospace;font-size:24px;color:var(--acc);text-shadow:0 0 30px var(--acc);display:none;letter-spacing:5px;">✓ ACCESS GRANTED</div>
+    <button class="mbtn g" id="bc-btn" style="display:none;margin-top:14px;" onclick="closeModal('m-breach')">[ CONTINUE ]</button>
+  </div>
+</div>
+<div class="modal" id="m-decrypt">
+  <div class="mbox">
+    <div class="mtitle g">🔓 DECRYPTING SECURE FILES</div>
+    <div class="msub">QUANTUM AES-256 OVERRIDE — BREAKING ENCRYPTION</div>
+    <div style="margin:12px 0;">
+      <div style="display:flex;justify-content:space-between;font-size:8px;color:var(--acc3);margin-bottom:3px;"><span id="dec-f">Initializing...</span><span id="dec-p">0%</span></div>
+      <div class="pbar" style="height:7px;"><div class="pf g" id="dec-bar" style="width:0%"></div></div>
+    </div>
+    <div class="mcode" id="dec-stream"></div>
+    <div id="dec-done" style="font-family:'Orbitron',monospace;font-size:16px;color:var(--acc);text-shadow:0 0 16px var(--acc);display:none;margin-top:8px;">✓ ALL FILES DECRYPTED</div>
+    <button class="mbtn g" id="dec-btn" style="display:none;margin-top:12px;" onclick="closeModal('m-decrypt')">[ ACCESS FILES ]</button>
+  </div>
+</div>
+<div class="modal" id="m-gov">
+  <div class="mbox r" id="m-gov-box">
+    <div style="font-size:36px;margin-bottom:6px;">🚨</div>
+    <div class="mtitle r">⚠ FEDERAL ALERT ⚠</div>
+    <div class="msub" style="color:var(--a);">CYBER DIVISION — EMERGENCY RESPONSE<br>SIGNAL TRACE ACTIVE — ORIGIN LOCKING...</div>
+    <div class="mcode" id="gov-trace"></div>
+    <button class="mbtn r" onclick="closeModal('m-gov')">[ CLOSE ]</button>
+  </div>
+</div>
+
+<!-- LOCKDOWN -->
+<div id="lockdown-overlay">
+  <div id="ld-title">🔒 EMERGENCY LOCKDOWN</div>
+  <div id="ld-sub">PHANTOM OS SECURITY PROTOCOL INITIATED<br>ALL SYSTEMS LOCKED — WIPING TRACES</div>
+  <div id="ld-count">30</div>
+  <div id="ld-bar-wrap"><div id="ld-bar"></div></div>
+  <button class="mbtn r" onclick="endLockdown()" style="margin-top:10px;">[ OVERRIDE — ABORT LOCKDOWN ]</button>
+</div>
+
+<!-- SETTINGS -->
+<div id="settings-panel">
+  <div id="sp-header">
+    <div id="sp-title">⚙ SETTINGS</div>
+    <button id="sp-close" onclick="toggleSettings()">✕ CLOSE</button>
+  </div>
+  <div id="sp-body">
+    <div class="sp-section">
+      <div class="sp-lbl">// DISPLAY</div>
+      <button id="fs-btn" onclick="toggleFullscreen()">⛶ TOGGLE FULLSCREEN</button>
+      <div class="sp-row"><span>Scanlines</span><div class="sp-toggle on" id="tgl-scan" onclick="toggleSetting(this,'scan')"></div></div>
+      <div class="sp-row"><span>Glitch FX</span><div class="sp-toggle on" id="tgl-glitch" onclick="toggleSetting(this,'glitch')"></div></div>
+      <div class="sp-row"><span>Matrix Rain</span><div class="sp-toggle on" id="tgl-matrix" onclick="toggleSetting(this,'matrix')"></div></div>
+      <div class="sp-row"><span>OS Flicker</span><div class="sp-toggle on" id="tgl-flicker" onclick="toggleSetting(this,'flicker')"></div></div>
+      <div class="sp-row"><span>Matrix Opacity</span></div>
+      <input type="range" class="sp-slider" min="1" max="20" value="7" oninput="setMatrixOpacity(this.value)">
+    </div>
+    <div class="sp-section">
+      <div class="sp-lbl">// ACCENT COLOUR THEME</div>
+      <div id="theme-grid">
+        <div class="theme-swatch active" style="background:#001a00;border:2px solid #00ff41;color:#00ff41;" onclick="setTheme('green',this)">GREEN</div>
+        <div class="theme-swatch" style="background:#00001a;border:2px solid #003366;color:#00aaff;" onclick="setTheme('blue',this)">BLUE</div>
+        <div class="theme-swatch" style="background:#1a0000;border:2px solid #660000;color:#ff2222;" onclick="setTheme('red',this)">RED</div>
+        <div class="theme-swatch" style="background:#0d0016;border:2px solid #440066;color:#cc00ff;" onclick="setTheme('purple',this)">PURPLE</div>
+        <div class="theme-swatch" style="background:#001a1a;border:2px solid #006666;color:#00ffff;" onclick="setTheme('cyan',this)">CYAN</div>
+        <div class="theme-swatch" style="background:#1a0e00;border:2px solid #664400;color:#ffaa00;" onclick="setTheme('amber',this)">AMBER</div>
+        <div class="theme-swatch" style="background:#0d1a0d;border:2px solid #335533;color:#e8ffe8;" onclick="setTheme('white',this)">GHOST</div>
+        <div class="theme-swatch" style="background:#160800;border:2px solid #663300;color:#ff6600;" onclick="setTheme('orange',this)">ORANGE</div>
+      </div>
+    </div>
+    <div class="sp-section">
+      <div class="sp-lbl">// SOUND</div>
+      <div class="sp-row"><span>Voice Assistant</span><div class="sp-toggle on" id="tgl-voice" onclick="toggleSetting(this,'voice')"></div></div>
+      <div class="sp-row"><span>Alert Sounds</span><div class="sp-toggle on" id="tgl-sfx" onclick="toggleSetting(this,'sfx')"></div></div>
+      <div class="sp-row"><span>Volume</span></div>
+      <input type="range" class="sp-slider" min="0" max="100" value="60" oninput="setVol(this.value)">
+    </div>
+    <div class="sp-section">
+      <div class="sp-lbl">// OS IDENTITY</div>
+      <div style="font-size:8px;color:var(--acc3);margin-bottom:4px;">OS NAME</div>
+      <input id="os-name-in" type="text" value="PHANTOM OS" oninput="setOsName(this.value)" autocomplete="off">
+    </div>
+    <div class="sp-section">
+      <div class="sp-lbl">// DRAMATIC FX</div>
+      <button class="abtn" style="width:100%;margin-bottom:4px;" onclick="triggerBreach()">💀 SYSTEM BREACH</button>
+      <button class="abtn" style="width:100%;margin-bottom:4px;" onclick="showDecrypt()">🔓 DECRYPT FILES</button>
+      <button class="abtn r" style="width:100%;margin-bottom:4px;" onclick="triggerGovAlert()">🚨 GOV ALERT</button>
+      <button class="abtn r" style="width:100%;margin-bottom:4px;" onclick="startLockdown()">🔒 LOCKDOWN MODE</button>
+      <button class="abtn" style="width:100%;background:var(--acc4);border-color:var(--acc);" onclick="screenShake()">📳 SCREEN SHAKE</button>
+    </div>
+  </div>
+  <div id="disclaimer-box">
+    ⚠ DISCLAIMER: PHANTOM OS is 100% fictional.<br>
+    It performs no real hacking, accesses no real<br>
+    systems, networks, devices, or data. All output<br>
+    is randomly generated for entertainment only.<br>
+    Use responsibly and only with consent. 😊
+  </div>
+</div>
+
+<div id="notif"></div>
+<div id="voice-bar">
+  <div class="vwave"><div class="vw"></div><div class="vw"></div><div class="vw"></div><div class="vw"></div><div class="vw"></div></div>
+  <span id="vtxt">PHANTOM AI — READY</span>
+  <span style="margin-left:auto;font-size:8px;color:var(--acc3);">PHANTOM AI v9 ◈ ENCRYPTED</span>
+</div>
+
+<!-- MAIN OS -->
+<div id="os">
+  <div id="menubar">
+    <div id="mb-logo">◈ <span id="mb-os-name">PHANTOM OS</span></div>
+    <div class="mb-item" onclick="openApp('terminal')">Terminal</div>
+    <div class="mb-item" onclick="openApp('worldmap')">Network</div>
+    <div class="mb-item" onclick="openApp('satellite')">Satellite</div>
+    <div class="mb-item" onclick="openApp('radar')">Radar</div>
+    <div class="mb-item" onclick="openApp('cams')">Cams</div>
+    <div class="mb-item" onclick="openApp('ai')">AI</div>
+    <div class="mb-item" onclick="openApp('missions')">Missions</div>
+    <div class="mb-item" onclick="openApp('modules')">Modules</div>
+    <div class="mb-item" onclick="triggerBreach()">💀 Breach</div>
+    <div class="mb-item" onclick="startLockdown()">🔒 Lock</div>
+    <div id="mb-right">
+      <div class="mb-stat"><div class="dot g"></div><span>VPN</span></div>
+      <div class="mb-stat"><div class="dot g"></div><span>TOR</span></div>
+      <div class="mb-stat"><div class="dot r"></div><span id="threat-lbl">THREAT:LOW</span></div>
+      <div class="mb-stat"><div class="dot a"></div><span id="mb-clock">00:00:00</span></div>
+      <div class="mb-stat" id="mb-pkt">PKTS:0</div>
+      <div class="mb-item" style="border-left:1px solid var(--border);margin-left:4px;" onclick="toggleSettings()">⚙</div>
+    </div>
+  </div>
+  <div id="desktop">
+    <div id="dock">
+      <div class="di" onclick="openApp('terminal')" id="di-terminal"><div class="ie">⌨️</div><div class="il">TERM</div></div>
+      <div class="di" onclick="openApp('worldmap')" id="di-worldmap"><div class="ie">🌐</div><div class="il">NET MAP</div></div>
+      <div class="di" onclick="openApp('face')" id="di-face"><div class="ie">👤</div><div class="il">FACE ID</div></div>
+      <div class="di" onclick="openApp('fingerprint')" id="di-fingerprint"><div class="ie">👆</div><div class="il">FINGER</div></div>
+      <div class="di" onclick="openApp('crack')" id="di-crack"><div class="ie">🔐</div><div class="il">PWD</div></div>
+      <div class="di" onclick="openApp('wifi')" id="di-wifi"><div class="ie">📶</div><div class="il">WI-FI</div></div>
+      <div class="di" onclick="openApp('satellite')" id="di-satellite"><div class="ie">🛰️</div><div class="il">SAT</div></div>
+      <div class="di" onclick="openApp('radar')" id="di-radar"><div class="ie">📡</div><div class="il">RADAR</div></div>
+      <div class="di" onclick="openApp('cams')" id="di-cams"><div class="ie">📷</div><div class="il">CAMS</div></div>
+      <div class="di" onclick="openApp('chat')" id="di-chat"><div class="ie">💬</div><div class="il">CHAT</div></div>
+      <div class="di" onclick="openApp('crypto')" id="di-crypto"><div class="ie">⛏️</div><div class="il">CRYPTO</div></div>
+      <div class="di" onclick="openApp('sysmon')" id="di-sysmon"><div class="ie">📊</div><div class="il">SYSMON</div></div>
+      <div class="di" onclick="openApp('ai')" id="di-ai"><div class="ie">🤖</div><div class="il">AI</div></div>
+      <!-- NEW APPS -->
+      <div class="di" onclick="openApp('dna')" id="di-dna"><div class="ie">🧬</div><div class="il">DNA</div></div>
+      <div class="di" onclick="openApp('voiceinterceptor')" id="di-voiceinterceptor"><div class="ie">🎙️</div><div class="il">VOICE</div></div>
+      <div class="di" onclick="openApp('typing')" id="di-typing"><div class="ie">⌚</div><div class="il">SPEED</div></div>
+      <div class="di" onclick="openApp('missions')" id="di-missions"><div class="ie">📋</div><div class="il">MISSIONS</div></div>
+      <div class="di" onclick="openApp('stego')" id="di-stego"><div class="ie">🖼️</div><div class="il">STEGO</div></div>
+      <div class="di" onclick="openApp('signal')" id="di-signal"><div class="ie">📻</div><div class="il">SIGNAL</div></div>
+      <div class="di" onclick="openApp('modules')" id="di-modules"><div class="ie">⚡</div><div class="il">MODULES</div></div>
+      <div class="dsep"></div>
+      <div class="di" onclick="triggerBreach()" style="border-color:#440000;"><div class="ie">💀</div><div class="il">BREACH</div></div>
+      <div class="di" onclick="showDecrypt()" style="border-color:#224400;"><div class="ie">🔓</div><div class="il">DECRYPT</div></div>
+      <div class="di" onclick="startLockdown()" style="border-color:#440000;"><div class="ie">🔒</div><div class="il">LOCKDOWN</div></div>
+      <div class="di" onclick="triggerGovAlert()" style="border-color:#440000;"><div class="ie">🚨</div><div class="il">GOV ALT</div></div>
+      <div class="di" onclick="toggleSettings()" style="border-color:#224433;"><div class="ie">⚙️</div><div class="il">SETTINGS</div></div>
+    </div>
+    <div id="workspace"></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const S={scan:true,glitch:true,matrix:true,flicker:true,voice:true,sfx:true,vol:.6};
+
+function toggleSetting(el,key){
+  el.classList.toggle('on');S[key]=el.classList.contains('on');
+  if(key==='scan')document.getElementById('scanlines').style.opacity=S.scan?'1':'0';
+  if(key==='glitch')document.getElementById('glitch').style.opacity=S.glitch?'':'-1';
+  if(key==='matrix')document.getElementById('matrix-canvas').style.opacity=S.matrix?'.07':'0';
+  if(key==='flicker')document.getElementById('os').style.animation=S.flicker?'flicker 10s infinite':'none';
+}
+function setMatrixOpacity(v){document.getElementById('matrix-canvas').style.opacity=(v/100*.2).toFixed(3);}
+function setVol(v){S.vol=v/100;}
+function setOsName(v){document.getElementById('mb-os-name').textContent=v||'PHANTOM OS';}
+let settingsOpen=false;
+function toggleSettings(){settingsOpen=!settingsOpen;document.getElementById('settings-panel').classList.toggle('open',settingsOpen);}
+function setTheme(name,el){document.body.className='theme-'+name;document.querySelectorAll('.theme-swatch').forEach(s=>s.classList.remove('active'));el.classList.add('active');setTimeout(reDrawMatrix,100);}
+function toggleFullscreen(){if(!document.fullscreenElement){document.documentElement.requestFullscreen().catch(()=>{});}else{document.exitFullscreen().catch(()=>{});}}
+
+// MATRIX
+const MC=document.getElementById('matrix-canvas');
+const MCTX=MC.getContext('2d');
+MC.width=innerWidth;MC.height=innerHeight;
+const MDROPS=Array(Math.floor(MC.width/13)).fill(1);
+const MCHARS='01アイウエオカキクケコABCDEFGHIJKLM<>{}[]/*&^%$#@!';
+function getAccentColor(){return getComputedStyle(document.body).getPropertyValue('--acc').trim()||'#00ff41';}
+function drawMatrix(){MCTX.fillStyle='rgba(0,3,5,0.05)';MCTX.fillRect(0,0,MC.width,MC.height);MCTX.fillStyle=getAccentColor();MCTX.font='11px Share Tech Mono';MDROPS.forEach((y,i)=>{MCTX.fillText(MCHARS[Math.floor(Math.random()*MCHARS.length)],i*13,y*13);if(y*13>MC.height&&Math.random()>.975)MDROPS[i]=0;MDROPS[i]++;});}
+setInterval(drawMatrix,50);
+function reDrawMatrix(){MCTX.fillStyle='rgba(0,0,0,1)';MCTX.fillRect(0,0,MC.width,MC.height);}
+
+// BOOT
+const BOOT_MSGS=[
+  ['Initializing PHANTOM OS v9 kernel...','ok'],['Loading quantum exploit framework v9...','ok'],
+  ['Establishing TOR circuit — 9 anonymous hops...','ok'],['VPN tunnel: AES-256-GCM active','ok'],
+  ['AI neural network agents: ONLINE (16 active)','ok'],['DNA analysis engine: LOADED','ok'],
+  ['Voice interceptor array: CALIBRATED','ok'],['Steganography decoder: ARMED','ok'],
+  ['Signal tracker: TRIANGULATING','ok'],['Mission log: SYNCED — 12 ops active','warn'],
+  ['All systems nominal — PHANTOM OS v9 READY','ok'],
+];
+let bootPct=0,bootMI=0;
+function runBoot(){
+  const bar=document.getElementById('boot-bar'),msg=document.getElementById('boot-msg'),log=document.getElementById('boot-log');
+  const iv=setInterval(()=>{
+    bootPct+=Math.random()*2.5+.8;if(bootPct>=100){bootPct=100;clearInterval(iv);
+      setTimeout(()=>{const b=document.getElementById('boot');b.style.transition='opacity .6s';b.style.opacity='0';setTimeout(()=>{b.style.display='none';document.getElementById('os').style.display='flex';onReady();},600);},500);
+    }
+    bar.style.width=bootPct.toFixed(0)+'%';
+    if(bootMI<BOOT_MSGS.length&&bootPct>bootMI*(100/BOOT_MSGS.length)){
+      const m=BOOT_MSGS[bootMI];msg.textContent=m[0];
+      const d=document.createElement('div');d.className='boot-log-line '+m[1];d.textContent='['+m[1].toUpperCase()+'] '+m[0];
+      log.appendChild(d);log.scrollTop=log.scrollHeight;bootMI++;
+    }
+  },55);
+}
+runBoot();
+
+function onReady(){
+  setInterval(()=>document.getElementById('mb-clock').textContent=new Date().toTimeString().slice(0,8),1000);
+  startCounters();
+  setTimeout(()=>openApp('terminal'),200);
+  setTimeout(()=>openApp('worldmap'),400);
+  setTimeout(()=>openApp('missions'),600);
+  setTimeout(()=>notify('PHANTOM OS','All 16 AI agents active. v9 systems online.','g'),1200);
+  setTimeout(()=>voice('PHANTOM OS version 9 initialized. DNA scanner and voice interceptor online.'),1500);
+}
+
+let pkts=0;
+function startCounters(){
+  setInterval(()=>{pkts+=Math.floor(Math.random()*600+100);document.getElementById('mb-pkt').textContent='PKTS:'+pkts.toLocaleString();},200);
+  const tl=['LOW','LOW','LOW','MEDIUM','MEDIUM','HIGH','CRITICAL'];let ti=0;
+  setInterval(()=>{if(Math.random()>.85)ti=Math.min(tl.length-1,ti+1);else if(Math.random()>.72)ti=Math.max(0,ti-1);
+    const el=document.getElementById('threat-lbl');if(el){el.textContent='THREAT:'+tl[ti];el.style.color=ti<2?'var(--acc)':ti<4?'var(--a)':'var(--r)';}
+  },3200);
+}
+
+// WINDOW MANAGER
+let zTop=10;const WINS={};
+const WS=()=>document.getElementById('workspace');
+const APPS={
+  terminal:{t:'PHANTOM TERMINAL — ROOT@PHANTOM',w:620,h:370,x:10,y:8,b:buildTerminal},
+  worldmap:{t:'GLOBAL NETWORK MAP — LIVE FEED',w:580,h:360,x:640,y:8,b:buildWorldMap},
+  face:{t:'FACIAL RECOGNITION — 4.2B DATABASE',w:360,h:410,x:80,y:40,b:buildFace},
+  fingerprint:{t:'DIGITAL FINGERPRINT SCANNER',w:340,h:370,x:120,y:60,b:buildFingerprint},
+  crack:{t:'GPU PASSWORD CRACKER — AI HYBRID',w:540,h:330,x:200,y:70,b:buildCrack},
+  wifi:{t:'WI-FI SCANNER — MULTI-BAND',w:540,h:330,x:140,y:100,b:buildWifi},
+  satellite:{t:'ORBITAL SATELLITE TRACKER — CLASSIFIED',w:580,h:370,x:90,y:30,b:buildSatellite},
+  radar:{t:'DIGITAL RADAR SWEEP — LIVE',w:500,h:370,x:160,y:40,b:buildRadar},
+  cams:{t:'SURVEILLANCE CAMERA FEEDS',w:560,h:360,x:130,y:60,b:buildCams},
+  chat:{t:'ENCRYPTED CHAT INTERCEPTOR',w:460,h:390,x:170,y:50,b:buildChat},
+  crypto:{t:'CRYPTO MINING — 8×GPU CLUSTER',w:480,h:390,x:150,y:45,b:buildCrypto},
+  sysmon:{t:'SYSTEM MONITOR — LIVE',w:390,h:310,x:650,y:380,b:buildSysmon},
+  ai:{t:'PHANTOM AI — CYBER ASSISTANT v9',w:480,h:400,x:180,y:55,b:buildAI},
+  modules:{t:'CLASSIFIED MISSION MODULES',w:580,h:440,x:100,y:35,b:buildModules},
+  // NEW
+  dna:{t:'DNA SEQUENCER — BIO-SIGNATURE ANALYSIS',w:540,h:380,x:120,y:50,b:buildDNA},
+  voiceinterceptor:{t:'VOICE INTERCEPTOR — SPECTRUM ANALYSIS',w:560,h:400,x:130,y:45,b:buildVoiceInterceptor},
+  typing:{t:'OPERATIVE SPEED CHALLENGE — CLASSIFIED STRINGS',w:520,h:370,x:140,y:55,b:buildTyping},
+  missions:{t:'MISSION CONTROL — ACTIVE OPERATIONS LOG',w:500,h:420,x:160,y:40,b:buildMissions},
+  stego:{t:'STEGANOGRAPHY ANALYZER — HIDDEN DATA EXTRACTOR',w:520,h:360,x:100,y:50,b:buildStego},
+  signal:{t:'RF SIGNAL TRACKER — TRIANGULATION ARRAY',w:560,h:370,x:90,y:40,b:buildSignal},
+};
+
+function openApp(id){
+  if(WINS[id]){focusWin(WINS[id]);return;}
+  const def=APPS[id];if(!def)return;
+  const ws=WS();const wsW=ws.clientWidth,wsH=ws.clientHeight;
+  const win=document.createElement('div');win.className='win focused';
+  win.style.cssText=`left:${Math.min(def.x,wsW-def.w-10)}px;top:${Math.min(def.y,wsH-def.h-10)}px;width:${def.w}px;height:${def.h}px;z-index:${++zTop};`;
+  win.innerHTML=`<div class="winbar"><div class="wbtns"><button class="wb wbr" onclick="closeWin('${id}')"></button><button class="wb wby" onclick="minWin('${id}')"></button><button class="wb wbg" onclick="maxWin('${id}')"></button></div><div class="wtitle">${def.t}</div><div style="width:40px"></div></div><div class="wcontent" id="wc-${id}"></div>`;
+  ws.appendChild(win);WINS[id]=win;
+  makeDrag(win);makeResize(win);
+  win.addEventListener('mousedown',()=>focusWin(win));
+  def.b(document.getElementById('wc-'+id));
+  document.getElementById('di-'+id)?.classList.add('on');
+}
+function focusWin(win){document.querySelectorAll('.win').forEach(w=>w.classList.remove('focused'));win.classList.add('focused');win.style.zIndex=++zTop;}
+function closeWin(id){if(WINS[id]){WINS[id].remove();delete WINS[id];document.getElementById('di-'+id)?.classList.remove('on');}}
+function minWin(id){if(WINS[id])WINS[id].style.display=WINS[id].style.display==='none'?'flex':'none';}
+function maxWin(id){
+  if(!WINS[id])return;const w=WINS[id],ws=WS();
+  if(w.dataset.max){w.style.cssText=`left:${w.dataset.ox}px;top:${w.dataset.oy}px;width:${w.dataset.ow}px;height:${w.dataset.oh}px;z-index:${zTop};`;delete w.dataset.max;}
+  else{w.dataset.ox=w.offsetLeft;w.dataset.oy=w.offsetTop;w.dataset.ow=w.offsetWidth;w.dataset.oh=w.offsetHeight;w.style.cssText=`left:0;top:0;width:${ws.clientWidth}px;height:${ws.clientHeight}px;z-index:${zTop};`;w.dataset.max='1';}
+}
+function makeDrag(win){
+  const bar=win.querySelector('.winbar');let ox,oy,dragging=false;
+  bar.addEventListener('mousedown',e=>{if(e.target.classList.contains('wb'))return;dragging=true;ox=e.clientX-win.offsetLeft;oy=e.clientY-win.offsetTop;});
+  document.addEventListener('mousemove',e=>{if(!dragging)return;const ws=WS();win.style.left=Math.max(0,Math.min(ws.clientWidth-win.offsetWidth,e.clientX-ox))+'px';win.style.top=Math.max(0,Math.min(ws.clientHeight-win.offsetHeight,e.clientY-oy))+'px';});
+  document.addEventListener('mouseup',()=>dragging=false);
+}
+function makeResize(win){
+  const h=document.createElement('div');h.style.cssText='position:absolute;right:0;bottom:0;width:10px;height:10px;cursor:se-resize;z-index:1;';win.appendChild(h);
+  let dragging=false,ox,oy,ow,oh;
+  h.addEventListener('mousedown',e=>{dragging=true;ox=e.clientX;oy=e.clientY;ow=win.offsetWidth;oh=win.offsetHeight;e.stopPropagation();});
+  document.addEventListener('mousemove',e=>{if(!dragging)return;win.style.width=Math.max(260,ow+e.clientX-ox)+'px';win.style.height=Math.max(160,oh+e.clientY-oy)+'px';});
+  document.addEventListener('mouseup',()=>dragging=false);
+}
+
+// ══ TERMINAL ══
+let curTgt={name:'Pentagon.gov',ip:'192.168.3.1'};
+function buildTerminal(el){
+  el.innerHTML=`<div class="wchdr"><span>ROOT@PHANTOM — AES-256-GCM — 9-HOP TOR</span><span id="t-sid">SID:${Math.random().toString(16).slice(2,10)}</span></div><div id="tout"></div><div id="tinrow"><span class="tpr">root@phantom:~$</span><input id="tcmd" type="text" placeholder="type 'help'" autocomplete="off" spellcheck="false"/></div>`;
+  setTimeout(()=>{bootTerm();const inp=document.getElementById('tcmd');if(inp)inp.addEventListener('keydown',handleCmd);},50);
+}
+const tout=()=>document.getElementById('tout');
+function tp(txt,cls='i',delay=0){return new Promise(r=>setTimeout(()=>{const el=tout();if(!el)return r();const d=document.createElement('div');d.className='tl '+cls;d.textContent=txt;el.appendChild(d);el.scrollTop=el.scrollHeight;r();},delay));}
+async function bootTerm(){
+  const ls=[['[PHANTOM v9] Terminal session started...','dm',0],['[*] TOR: 9-hop anonymous route active','i',200],['[*] VPN: AES-256-GCM tunnel live','i',400],['[*] AI: 16 autonomous agents deployed','i',600],['[*] DNA scanner: ONLINE','i',700],['[*] Identity: FULLY MASKED — 0 traces','ok',800],['','dm',950],
+    ['╔══════════════════════════════════════════════╗','c',1000],
+    ['║   PHANTOM OS v9 — Cyber Command Platform   ║','c',1080],
+    ['║  ⚠  SIMULATED — 100% FICTIONAL SYSTEM  ⚠   ║','w',1160],
+    ['╚══════════════════════════════════════════════╝','c',1240],
+    ['',  'dm',1300],[`[+] Active target: ${curTgt.name} (${curTgt.ip})`,'w',1400],
+    ['[+] Type "help" for all commands — fully simulated','i',1550],];
+  for(const l of ls)await tp(l[0],l[1],l[2]);
+}
+const XPL={
+  scan:async()=>{
+    await tp(`\n> port_scan --target ${curTgt.ip} --stealth --full-range`,'c');
+    await tp('[*] Deploying quantum stealth probes...','i',150);
+    const P=[21,22,25,53,80,443,445,3306,3389,8080,8443,27017,6379,9200];
+    const SV={21:'FTP',22:'SSH',25:'SMTP',53:'DNS',80:'HTTP',443:'HTTPS',445:'SMB',3306:'MySQL',3389:'RDP',8080:'HTTP-Alt',8443:'HTTPS-Alt',27017:'MongoDB',6379:'Redis',9200:'Elasticsearch'};
+    for(let i=0;i<P.length;i++){const o=Math.random()>.3;await tp(`  ${curTgt.ip}:${P[i]}  ${o?'OPEN  ':'CLOSED'}  ${SV[P[i]]}${o?' ◄ EXPLOIT READY':''}`,(o?'ok':'dm'),200+i*75);}
+    await tp('\n[+] Scan complete — 10 exploitable vectors found','ok',200+P.length*75+200);
+    notify('Port Scan','Exploitable ports found on target','a');voice('Port scan complete. Multiple vulnerabilities detected.');
+  },
+  brute:async()=>{
+    await tp(`\n> neural_brute --host ${curTgt.ip} --ai-model phantom-v9`,'c');
+    await tp('[*] Neural AI wordlist: 256M passwords + patterns...','i',200);
+    const PW=['password123','admin2024','letmein!','qwerty99','r00t_toor','shadow_x2','dragon_fire','monkey99'];
+    for(let i=0;i<PW.length-1;i++)await tp(`  [${i+1}] ${PW[i]} → ACCESS DENIED`,'e',350+i*160);
+    await tp(`  [${PW.length}] ${PW[PW.length-1]} → ✓ MATCH FOUND!`,'ok',350+PW.length*160);
+    await tp('\n[+] ROOT SHELL — uid=0(root) gid=0(root)','ok',350+PW.length*160+300);
+    showAccess('SSH ROOT — '+curTgt.name,'Neural AI cracked password in 8.3 seconds');
+  },
+  quantum:async()=>{
+    await tp(`\n> quantum_decrypt --target ${curTgt.ip} --qubits 4096`,'c');
+    await tp('[*] Initializing 4096-qubit quantum processor...','p',300);
+    await tp('[*] Factoring RSA-2048 encryption key...','p',800);
+    await tp('[*] Quantum interference: 99.7% coherence','p',1400);
+    await tp('[*] Key factored in 0.003 seconds','ok',2000);
+    await tp('[+] ALL ENCRYPTED COMMS NOW READABLE','ok',2800);
+    notify('Quantum Decrypt','RSA-2048 broken','a');voice('Quantum decryption complete.');
+  },
+  dna:async()=>{
+    await tp('\n> dna_extract --sample TARGET --depth 99','c');
+    await tp('[*] Opening DNA analysis engine v9...','p',300);
+    const seq=['ATCG','GCTA','TTAG','CGAT','AATG','GCCC','TATA','AGCT'];
+    for(let i=0;i<seq.length;i++)await tp(`  [LOCUS ${i+1}] ${seq[i]}${'ATCG'.split('').map(()=>seq[Math.floor(Math.random()*seq.length)]).join('')} — ${Math.random()>.5?'MATCH':'UNIQUE'}`,'d',400+i*280);
+    await tp('\n[+] DNA PROFILE MATCHED — IDENTITY CONFIRMED','ok',400+seq.length*280+200);
+    openApp('dna');voice('DNA extraction complete. Biological signature matched to database.');
+  },
+  signal:async()=>{
+    await tp('\n> signal_trace --freq auto --triangulate','c');
+    await tp('[*] Scanning RF bands: 88-108MHz, 150MHz, 433MHz, 900MHz, 2.4GHz...','p',300);
+    const bands=['FM 94.7MHz','UHF 433.92MHz','GSM 900MHz','WiFi 2.4GHz','Satellite L-band'];
+    for(let i=0;i<bands.length;i++)await tp(`  [BAND] ${bands[i]} — ${Math.random()>.4?'ACTIVE':'SILENT'} — SIG:${(-Math.floor(50+Math.random()*40))}dBm`,'d',400+i*250);
+    await tp('\n[+] SIGNAL SOURCE TRIANGULATED — LOCATION LOCKED','ok',400+bands.length*250+200);
+    notify('Signal','RF source triangulated','a');openApp('signal');
+  },
+  stego:async()=>{
+    await tp('\n> stego_analyze --file intercept.png --depth full','c');
+    await tp('[*] Analyzing pixel LSB layers...','p',300);
+    await tp('[*] Checking audio frequency steganography...','p',800);
+    await tp('[*] Scanning for hidden metadata layers...','p',1200);
+    await tp('[+] HIDDEN MESSAGE DETECTED IN IMAGE','ok',1700);
+    await tp('[+] Extracted: "MEET AT 0300 — SECTOR GAMMA — CODE: PHANTOM9"','a',2000);
+    notify('STEGO','Hidden message extracted!','a');openApp('stego');
+  },
+};
+
+const TERM_CMDS={
+  help:async()=>{const cmds=['scan — port scan target','brute — AI brute force SSH','quantum — quantum decryption','dna — DNA sequence extraction','signal — RF signal triangulation','stego — steganography analyzer','mission — add a random mission','whoami — identity','sysinfo — system information','netstat — active connections','ifconfig — network interfaces','ps — process list','clear — clear terminal','target <name> — change target','breach — system breach FX','decrypt — decrypt files modal','lockdown — emergency lockdown','shake — screen shake'];cmds.forEach(l=>tp('  '+l,'i'));},
+  whoami:async()=>tp('root (uid=0) — clearance: OMEGA — identity: PHANTOM AGENT 7','ok'),
+  sysinfo:async()=>{await tp('[SYSTEM INFO]','c');['OS: PHANTOM v9 CLASSIFIED BUILD','CPU: Quantum Core i9-X — 5.4GHz × 32','RAM: 512 GB ECC DDR6','GPU: 8× RTX 9090 Ti','NETWORK: 40 Gbps encrypted fiber','LOCATION: CLASSIFIED — TOR MASKED'].forEach(l=>tp('  '+l,'d'));},
+  netstat:async()=>{await tp('[ACTIVE CONNECTIONS]','c');for(let i=0;i<6;i++){const ip=`${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`;await tp(`  TCP ${ip}:${Math.floor(Math.random()*50000+1024)}  ESTABLISHED`,'ok',i*100);}},
+  ifconfig:async()=>{await tp('eth0:  192.168.1.'+Math.floor(Math.random()*200+10)+'  [REAL]','d');await tp('tun0:  10.8.0.1  [VPN TUNNEL]','ok');await tp('tor0:  127.0.0.1:9050  [TOR PROXY]','p');},
+  ps:async()=>{await tp('[PROCESS LIST]','c');['phantom_core [PID 1]','ai_agents×16 [PID 2-18]','vpn_daemon [PID 19]','tor_relay [PID 20]','dna_engine [PID 21]','signal_tracker [PID 22]'].forEach((p,i)=>setTimeout(()=>tp('  '+p,'i'),i*80));},
+  mission:async()=>{addRandomMission();await tp('[+] New classified mission added to operation log','ok');notify('Mission','New classified op assigned','a');},
+  clear:async()=>{const el=tout();if(el)el.innerHTML='';},
+};
+
+async function handleCmd(e){
+  if(e.key!=='Enter')return;
+  const cmd=e.target.value.trim();e.target.value='';if(!cmd)return;
+  await tp(`root@phantom:~$ ${cmd}`,'c');
+  const c=cmd.toLowerCase().split(' ')[0];
+  if(TERM_CMDS[c])TERM_CMDS[c]();
+  else if(c==='scan')XPL.scan();
+  else if(c==='brute')XPL.brute();
+  else if(c==='quantum')XPL.quantum();
+  else if(c==='dna')XPL.dna();
+  else if(c==='signal')XPL.signal();
+  else if(c==='stego')XPL.stego();
+  else if(c==='breach')triggerBreach();
+  else if(c==='decrypt')showDecrypt();
+  else if(c==='lockdown')startLockdown();
+  else if(c==='shake')screenShake();
+  else if(c==='target'){const n=cmd.slice(7).trim();if(n){curTgt={name:n,ip:'10.'+Math.floor(Math.random()*255)+'.'+Math.floor(Math.random()*255)+'.1'};tp(`[*] Target → ${n} (${curTgt.ip})`,'w');}}
+  else tp(`bash: ${cmd}: command not found (try 'help')`,'e');
+}
+
+// ══ WORLD MAP ══
+let mapAnim=null,mapNodes=[],mapConns=[];
+function buildWorldMap(el){
+  el.innerHTML=`<div class="wchdr"><span>GLOBAL NETWORK — LIVE INTRUSION MAP</span><span id="map-pkt">PKTS:0</span></div><canvas id="map-canvas"></canvas><div id="map-footer"><div><div class="sl">ACTIVE NODES</div><div class="sv" id="mn-nodes">0</div></div><div><div class="sl">COMPROMISED</div><div class="sv r" id="mn-comp">0</div></div><div><div class="sl">BANDWIDTH</div><div class="sv b" id="mn-bw">0</div></div><div><div class="sl">DATA SIPHONED</div><div class="sv a" id="mn-sip">0 TB</div></div></div>`;
+  setTimeout(initMap,50);
+}
+function initMap(){
+  const canvas=document.getElementById('map-canvas');if(!canvas)return;
+  const p=canvas.parentElement;canvas.width=p.clientWidth;canvas.height=p.clientHeight-90;
+  const cities=[{n:'NY',x:.22,y:.38},{n:'LONDON',x:.44,y:.27},{n:'MOSCOW',x:.57,y:.24},{n:'BEIJING',x:.73,y:.35},{n:'TOKYO',x:.83,y:.37},{n:'SYDNEY',x:.81,y:.73},{n:'SAO PAULO',x:.30,y:.65},{n:'CAIRO',x:.54,y:.43},{n:'DUBAI',x:.61,y:.43},{n:'BERLIN',x:.49,y:.25},{n:'DELHI',x:.65,y:.40},{n:'SINGAPORE',x:.75,y:.54},{n:'TORONTO',x:.23,y:.32},{n:'LAGOS',x:.47,y:.53},{n:'SEOUL',x:.80,y:.34}];
+  mapNodes=cities.map(c=>({...c,x:c.x*canvas.width,y:c.y*canvas.height,comp:Math.random()>.5,pr:0,po:1}));
+  mapConns=[];for(let i=0;i<20;i++){const a=Math.floor(Math.random()*mapNodes.length),b=Math.floor(Math.random()*mapNodes.length);if(a!==b)mapConns.push({a,b,p:Math.random(),sp:Math.random()*.012+.003});}
+  let sip=0;
+  setInterval(()=>{sip+=Math.random()*.3;['mn-nodes','mn-comp','mn-bw','mn-sip','map-pkt'].forEach(id=>{const e=document.getElementById(id);if(!e)return;if(id==='mn-nodes')e.textContent=mapNodes.length+Math.floor(Math.random()*8);else if(id==='mn-comp')e.textContent=mapNodes.filter(n=>n.comp).length+Math.floor(Math.random()*2);else if(id==='mn-bw')e.textContent=(Math.random()*12+2).toFixed(1)+' GB/s';else if(id==='mn-sip')e.textContent=sip.toFixed(2)+' TB';else e.textContent='PKTS:'+pkts.toLocaleString();});},700);
+  drawMap(canvas);
+}
+function drawMap(canvas){
+  if(!document.getElementById('map-canvas')){mapAnim=null;return;}
+  const ctx=canvas.getContext('2d');const w=canvas.width,h=canvas.height;const acc=getAccentColor();
+  ctx.fillStyle='rgba(0,3,5,.35)';ctx.fillRect(0,0,w,h);
+  ctx.strokeStyle='rgba(0,40,0,.08)';ctx.lineWidth=.5;
+  for(let x=0;x<w;x+=45){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}
+  for(let y=0;y<h;y+=45){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
+  mapConns.forEach(c=>{c.p+=c.sp;if(c.p>1)c.p=0;const a=mapNodes[c.a],b=mapNodes[c.b];ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle='rgba(0,80,0,.08)';ctx.lineWidth=.4;ctx.stroke();const px=a.x+(b.x-a.x)*c.p,py=a.y+(b.y-a.y)*c.p;ctx.beginPath();ctx.arc(px,py,2,0,Math.PI*2);ctx.fillStyle=acc+'bb';ctx.fill();});
+  mapNodes.forEach(n=>{n.pr+=.4;if(n.pr>22)n.pr=0;n.po=1-n.pr/22;ctx.beginPath();ctx.arc(n.x,n.y,n.pr,0,Math.PI*2);ctx.strokeStyle=n.comp?`rgba(255,34,34,${n.po*.4})`:`${acc}${Math.floor(n.po*.3*255).toString(16).padStart(2,'0')}`;ctx.lineWidth=1;ctx.stroke();ctx.beginPath();ctx.arc(n.x,n.y,4,0,Math.PI*2);ctx.fillStyle=n.comp?'#ff2222':acc;ctx.fill();ctx.fillStyle=n.comp?'rgba(255,60,60,.6)':acc+'88';ctx.font='7px Share Tech Mono';ctx.fillText(n.n,n.x+7,n.y+3);});
+  mapAnim=requestAnimationFrame(()=>drawMap(canvas));
+}
+
+// ══ FACE / FINGERPRINT ══
+const FACE_IDS=['Agent: CLASSIFIED — NSA Tier 1','John Smith — CIA #4471','UNKNOWN — NO DATABASE MATCH','Viktor Petrov — INTERPOL WANTED','Sarah Chen — DoD Analyst TS/SCI','TARGET ACQUIRED — TRACKING ACTIVE'];
+let faceIV=null;
+function buildFace(el){
+  el.innerHTML=`<div class="wchdr"><span>FACIAL RECOGNITION — 4.2B RECORD SCAN</span><span id="face-st">SCANNING</span></div><div class="scan-wrap"><div class="scan-frame" style="width:160px;height:200px;"><div class="sc2 tr"></div><div class="sc2 bl"></div><div id="face-scanbar"></div><canvas id="face-cv" width="160" height="200"></canvas></div><div class="scan-info"><div id="face-prog" style="font-size:8px;color:var(--acc3);margin-bottom:5px;">MAPPING LANDMARKS...</div><div class="scan-id" id="face-id"></div><button class="abtn" style="margin-top:8px;" onclick="runFaceScan()">[ RESCAN ]</button></div></div>`;
+  setTimeout(runFaceScan,50);
+}
+function runFaceScan(){
+  if(faceIV)clearInterval(faceIV);
+  const cv=document.getElementById('face-cv');if(!cv)return;
+  const ctx=cv.getContext('2d');
+  const el_id=document.getElementById('face-id'),el_prog=document.getElementById('face-prog'),el_st=document.getElementById('face-st');
+  if(el_id)el_id.textContent='';if(el_st)el_st.textContent='SCANNING';
+  const pts=Array(38).fill(0).map(()=>({x:8+Math.random()*144,y:8+Math.random()*184,s:Math.random()*2+.8}));
+  let tick=0,done=false;
+  faceIV=setInterval(()=>{
+    if(!cv.parentElement){clearInterval(faceIV);return;}
+    ctx.clearRect(0,0,160,200);const acc=getAccentColor();
+    ctx.strokeStyle='rgba(0,200,50,.2)';ctx.lineWidth=.5;
+    for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){const d=Math.hypot(pts[i].x-pts[j].x,pts[i].y-pts[j].y);if(d<48){ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.stroke();}}
+    ctx.fillStyle=acc;pts.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,p.s*(0.6+Math.sin(tick*.09+p.x)*.4),0,Math.PI*2);ctx.fill();});
+    const pct=Math.min(100,tick*1.4);
+    if(el_prog)el_prog.textContent=pct<25?'MAPPING FACIAL LANDMARKS...':pct<55?'CROSS-REFERENCING 4.2B RECORDS...':pct<85?'ANALYZING BIOMETRIC MARKERS...':'IDENTITY CONFIRMED ✓';
+    if(pct>=100&&!done){done=true;clearInterval(faceIV);const id=FACE_IDS[Math.floor(Math.random()*FACE_IDS.length)];if(el_id)el_id.textContent=id;if(el_st)el_st.textContent='MATCH';notify('Face ID','Identified: '+id.split('—')[0].trim(),'g');}
+    tick++;
+  },55);
+}
+
+const FP_IDS=['CLASSIFIED — OMEGA CLEARANCE','Dmitri V. — FSB FIELD AGENT','MATCH 99.7% — FUGITIVE #F-7734','Sarah M. — NSA CONTRACTOR (ACTIVE)','NO MATCH — SUBJECT UNKNOWN'];
+let fpIV=null;
+function buildFingerprint(el){
+  el.innerHTML=`<div class="wchdr"><span>BIOMETRIC FINGERPRINT — RIDGE ANALYSIS</span><span id="fp-st">SCANNING</span></div><div class="scan-wrap"><canvas id="fp-cv" width="180" height="220" style="border:1px solid var(--border);"></canvas><div class="scan-info"><div id="fp-prog" style="font-size:8px;color:var(--acc3);margin-bottom:5px;">READING RIDGES...</div><div class="scan-id" id="fp-id"></div><button class="abtn" style="margin-top:8px;" onclick="runFPScan()">[ RESCAN ]</button></div></div>`;
+  setTimeout(runFPScan,50);
+}
+function runFPScan(){
+  if(fpIV)clearInterval(fpIV);
+  const cv=document.getElementById('fp-cv');if(!cv)return;
+  const ctx=cv.getContext('2d');
+  const el_id=document.getElementById('fp-id'),el_prog=document.getElementById('fp-prog'),el_st=document.getElementById('fp-st');
+  if(el_id)el_id.textContent='';if(el_st)el_st.textContent='SCANNING';
+  let tick=0,done=false;
+  fpIV=setInterval(()=>{
+    if(!cv.parentElement){clearInterval(fpIV);return;}
+    ctx.fillStyle='rgba(0,3,0,.3)';ctx.fillRect(0,0,180,220);
+    const pct=Math.min(100,tick*.75);const nl=Math.floor(pct/100*42)+4;const acc=getAccentColor();
+    ctx.strokeStyle=acc+'70';ctx.lineWidth=1;
+    for(let i=0;i<nl;i++){const y=15+i*4.8+Math.sin(tick*.04+i)*.4;const ind=25+Math.sin(i*.38+tick*.015)*18;ctx.beginPath();ctx.moveTo(ind,y);for(let x=ind;x<180-ind;x+=3)ctx.lineTo(x,y+Math.sin(x*.14+i)*(2+Math.sin(i*.3)*1.5));ctx.stroke();}
+    const sy=(tick*1.8)%220;ctx.fillStyle='rgba(0,255,65,.12)';ctx.fillRect(0,sy,180,3);
+    if(el_prog)el_prog.textContent=pct<30?'READING DERMAL RIDGES...':pct<65?'ANALYZING MINUTIAE...':pct<90?'DATABASE MATCHING...':'FINGERPRINT VERIFIED ✓';
+    if(pct>=100&&!done){done=true;clearInterval(fpIV);const id=FP_IDS[Math.floor(Math.random()*FP_IDS.length)];if(el_id)el_id.textContent=id;if(el_st)el_st.textContent='MATCHED';}
+    tick++;
+  },55);
+}
+
+// ══ PASSWORD CRACKER ══
+let crackIV=null,crTot=0,crFnd=0;
+function buildCrack(el){
+  el.innerHTML=`<div class="wchdr"><span>GPU BRUTE FORCE — TARGET: ${curTgt.name.toUpperCase()}</span><span>PHANTOM AI HYBRID</span></div><div id="crack-stream"></div><div id="crack-footer"><div><div class="cfl">ATTEMPTS/SEC</div><div class="cfv" id="cf-a">0</div></div><div><div class="cfl">TOTAL TRIED</div><div class="cfv" id="cf-t">0</div></div><div><div class="cfl">CRACKED</div><div class="cfv" id="cf-c" style="color:var(--a)">0</div></div><div><div class="cfl">HASH TYPE</div><div class="cfv" id="cf-h" style="font-size:9px">SHA-256</div></div></div>`;
+  setTimeout(startCrack,50);
+}
+const HASHES=['MD5','SHA-1','SHA-256','SHA-512','bcrypt','NTLM','WPA2-PSK','Argon2','scrypt'];
+function startCrack(){
+  if(crackIV)clearInterval(crackIV);crTot=0;crFnd=0;
+  crackIV=setInterval(()=>{
+    const s=document.getElementById('crack-stream');if(!s)return clearInterval(crackIV);
+    const pw=Array(Math.floor(Math.random()*10+4)).fill(0).map(()=>'abcdefghijklmnopqrstuvwxyz0123456789!@#$%'[Math.floor(Math.random()*41)]).join('');
+    const found=Math.random()>.972;
+    const d=document.createElement('div');d.className='cl'+(found?' found':'');
+    d.textContent=(found?'[MATCH] ':'[     ] ')+pw+(found?' ◄ CRACKED!':'');
+    s.appendChild(d);if(s.children.length>250)s.removeChild(s.firstChild);s.scrollTop=s.scrollHeight;
+    if(found){crFnd++;const e=document.getElementById('cf-c');if(e)e.textContent=crFnd;notify('Password Cracked','Credentials captured!','a');}
+    crTot+=Math.floor(Math.random()*900+300);
+    const ea=document.getElementById('cf-a'),et=document.getElementById('cf-t'),eh=document.getElementById('cf-h');
+    if(ea)ea.textContent=(Math.floor(Math.random()*180000+80000)).toLocaleString();
+    if(et)et.textContent=crTot.toLocaleString();
+    if(eh)eh.textContent=HASHES[Math.floor(Math.random()*HASHES.length)];
+  },33);
+}
+
+// ══ WIFI ══
+const WIFI_DATA=[{s:'FBI_Surveillance_Van',b:'AA:BB:CC:11:22:33',sg:92,ch:6,sec:'WPA3',cl:0,sc:'ewpa3',v:'Cisco'},{s:'NSA_Mobile_Unit_3',b:'FF:EE:DD:CC:BB:AA',sg:88,ch:36,sec:'WPA3',cl:0,sc:'ewpa3',v:'Cisco'},{s:'Pretty_Fly_For_A_WiFi',b:'DE:AD:BE:EF:00:01',sg:76,ch:11,sec:'WPA2',cl:3,sc:'ewpa2',v:'ASUS'},{s:'CIA_Ops_Delta',b:'BA:AD:F0:0D:BE:EF',sg:71,ch:44,sec:'WPA3',cl:0,sc:'ewpa3',v:'Cisco'},{s:'FREE_WIFI_HACK_ME_PLZ',b:'AA:11:BB:22:CC:33',sg:33,ch:1,sec:'OPEN',cl:9,sc:'eopen',v:'Unknown'},{s:'INTERPOL_SECURE',b:'77:66:55:44:33:22',sg:80,ch:36,sec:'WPA3',cl:0,sc:'ewpa3',v:'Cisco'},{s:'SkyNet_Alpha_7',b:'12:34:56:78:9A:BC',sg:61,ch:6,sec:'WPA2',cl:2,sc:'ewpa2',v:'Netgear'},{s:'Mom_Don\'t_Hack_Please',b:'55:66:77:88:99:AA',sg:67,ch:6,sec:'WPA2',cl:2,sc:'ewpa2',v:'Linksys'}];
+let wfR=false;
+function buildWifi(el){
+  el.innerHTML=`<div class="wchdr"><span>WI-FI SCANNER — 2.4GHz + 5GHz + 6GHz</span><span id="wf-st">IDLE</span></div><div class="wcbody"><table class="wt"><thead><tr><th>SSID</th><th>BSSID</th><th>SIG</th><th>CH</th><th>SEC</th><th>CLIENTS</th><th>VENDOR</th></tr></thead><tbody id="wf-body"></tbody></table><button class="abtn" style="margin-top:8px;" onclick="doWifiScan()">[ RESCAN ALL BANDS ]</button></div>`;
+  setTimeout(doWifiScan,50);
+}
+function doWifiScan(){
+  if(wfR)return;wfR=true;const tb=document.getElementById('wf-body');if(!tb)return;
+  tb.innerHTML='';if(document.getElementById('wf-st'))document.getElementById('wf-st').textContent='SCANNING...';
+  [...WIFI_DATA].sort(()=>Math.random()-.5).forEach((n,i)=>setTimeout(()=>{
+    if(!document.getElementById('wf-body'))return;
+    const sg=Math.max(20,Math.min(100,n.sg+Math.floor(Math.random()*10-5)));
+    const bw=Math.round(sg/100*36);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="color:var(--acc)">${n.s}</td><td style="color:var(--acc3);font-size:7px">${n.b}</td><td><span style="display:inline-block;width:${bw}px;height:6px;background:var(--acc);vertical-align:middle;margin-right:3px;"></span>${sg}%</td><td style="color:var(--acc3)">${n.ch}</td><td><span class="enc ${n.sc}">${n.sec}</span></td><td style="color:var(--acc3)">${n.cl}</td><td style="color:var(--acc3);font-size:7px">${n.v}</td>`;
+    tb.appendChild(tr);if(i===WIFI_DATA.length-1){if(document.getElementById('wf-st'))document.getElementById('wf-st').textContent='FOUND '+WIFI_DATA.length+' NETS';wfR=false;}
+  },i*140));
+}
+
+// ══ SATELLITE ══
+let satAnim=null,satsArr=[];
+function buildSatellite(el){
+  el.innerHTML=`<div class="wchdr b"><span>ORBITAL TRACKER — CLASSIFIED INTERCEPT</span><span>LIVE</span></div><canvas id="sat-el"></canvas><div id="sat-footer"><div><div class="cfl">TRACKED</div><div class="cfv" id="sf-t">0</div></div><div><div class="cfl">LOCKED</div><div class="cfv" id="sf-l">--</div></div><div><div class="cfl">ALT (km)</div><div class="cfv" id="sf-a">--</div></div><div><div class="cfl">SIGNAL dB</div><div class="cfv" id="sf-s">--</div></div><div><div class="cfl">LAT/LON</div><div class="cfv" id="sf-p" style="font-size:8px">--/--</div></div></div>`;
+  setTimeout(initSat,50);
+}
+function initSat(){
+  const cv=document.getElementById('sat-el');if(!cv)return;
+  const p=cv.parentElement;cv.width=p.clientWidth;cv.height=p.clientHeight-70;
+  if(!satsArr.length)satsArr=Array(22).fill(0).map((_,i)=>({a:Math.random()*Math.PI*2,sp:(Math.random()*.003+.0005)*(Math.random()>.5?1:-1),r:55+Math.random()*120,tilt:Math.random()*Math.PI,name:['ISS','GPS-'+i,'KEYHOLE-'+(i+1),'AEHF-'+i,'MILSTAR-'+i,'NRO-'+(i+1),'SPY-'+i][Math.floor(Math.random()*7)],active:Math.random()>.2}));
+  if(satAnim)cancelAnimationFrame(satAnim);drawSat(cv);
+  if(document.getElementById('sf-t'))document.getElementById('sf-t').textContent=satsArr.filter(s=>s.active).length;
+}
+function drawSat(cv){
+  if(!document.getElementById('sat-el')){satAnim=null;return;}
+  const ctx=cv.getContext('2d');const w=cv.width,h=cv.height,cx=w/2,cy=h/2;
+  ctx.fillStyle='rgba(0,3,5,.32)';ctx.fillRect(0,0,w,h);
+  for(let i=0;i<55;i++){ctx.fillStyle='rgba(255,255,255,'+(.04+Math.random()*.18)+')';ctx.fillRect(Math.random()*w,Math.random()*h,1,1);}
+  const eg=ctx.createRadialGradient(cx,cy,0,cx,cy,52);eg.addColorStop(0,'#003366');eg.addColorStop(.7,'#001a44');eg.addColorStop(1,'#000511');
+  ctx.beginPath();ctx.arc(cx,cy,52,0,Math.PI*2);ctx.fillStyle=eg;ctx.fill();ctx.strokeStyle='#0055aa';ctx.lineWidth=1.5;ctx.stroke();
+  ctx.strokeStyle='rgba(0,150,255,.05)';ctx.lineWidth=.5;for(let r=65;r<Math.max(w,h);r+=52){ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.stroke();}
+  satsArr.forEach(s=>{s.a+=s.sp;ctx.beginPath();ctx.ellipse(cx,cy,s.r,s.r*.28,s.tilt,0,Math.PI*2);ctx.strokeStyle='rgba(0,150,255,.07)';ctx.lineWidth=.5;ctx.stroke();
+    const sx=cx+Math.cos(s.a)*s.r,sy=cy+Math.sin(s.a)*s.r*.28;
+    ctx.beginPath();ctx.arc(sx,sy,s.active?3:1.5,0,Math.PI*2);ctx.fillStyle=s.active?'#00aaff':'#ff2222';ctx.fill();
+    if(s.active){ctx.fillStyle='rgba(0,170,255,.5)';ctx.font='7px Share Tech Mono';ctx.fillText(s.name,sx+4,sy-2);}});
+  ['sf-a','sf-l','sf-s','sf-p'].forEach(id=>{const e=document.getElementById(id);if(!e)return;if(id==='sf-a')e.textContent=Math.floor(380+Math.random()*250);else if(id==='sf-l')e.textContent=Math.random()>.25?'STRONG':'WEAK';else if(id==='sf-s')e.textContent=(-Math.floor(40+Math.random()*40))+' dB';else e.textContent=(Math.random()*180-90).toFixed(2)+'/'+(Math.random()*360-180).toFixed(2);});
+  satAnim=requestAnimationFrame(()=>drawSat(cv));
+}
+
+// ══ RADAR ══
+let radarAnim=null,radarAngle=0,radarContacts=[];
+function buildRadar(el){
+  el.innerHTML=`<div class="wchdr"><span>DIGITAL RADAR — THREAT DETECTION</span><span>SWEEPING</span></div><div style="display:flex;flex:1;overflow:hidden;"><div id="radar-wrap"><canvas id="radar-el"></canvas></div><div id="radar-side"><div class="slbl">CONTACTS</div><div id="radar-contacts"></div></div></div>`;
+  setTimeout(initRadar,50);
+}
+const RADAR_NAMES=['UNKNOWN-A','GHOST-2','SHADOW-7','ROGUE-F3','SPECTRE-1','PHANTOM-X','BOGEY-9','CONTACT-4'];
+function initRadar(){
+  const cv=document.getElementById('radar-el');if(!cv)return;
+  const wrap=document.getElementById('radar-wrap');const sz=Math.min(wrap.clientWidth,wrap.clientHeight-10);cv.width=sz;cv.height=sz;
+  radarContacts=Array(6).fill(0).map((_,i)=>({angle:Math.random()*Math.PI*2,dist:0.2+Math.random()*.7,name:RADAR_NAMES[i],hostile:Math.random()>.5,visible:false,vt:0}));
+  if(radarAnim)cancelAnimationFrame(radarAnim);drawRadar(cv);
+}
+function drawRadar(cv){
+  if(!document.getElementById('radar-el')){radarAnim=null;return;}
+  const ctx=cv.getContext('2d');const sz=cv.width,cx=sz/2,cy=sz/2,r=sz/2-10;const acc=getAccentColor();
+  ctx.fillStyle='rgba(0,5,0,.25)';ctx.fillRect(0,0,sz,sz);
+  ctx.strokeStyle=acc+'18';ctx.lineWidth=.5;[.25,.5,.75,1].forEach(f=>{ctx.beginPath();ctx.arc(cx,cy,r*f,0,Math.PI*2);ctx.stroke();});
+  ctx.beginPath();ctx.moveTo(cx,cy-r);ctx.lineTo(cx,cy+r);ctx.stroke();ctx.beginPath();ctx.moveTo(cx-r,cy);ctx.lineTo(cx+r,cy);ctx.stroke();
+  radarAngle+=0.03;
+  ctx.save();ctx.translate(cx,cy);ctx.rotate(radarAngle);
+  ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,r,-0.4,0);ctx.closePath();ctx.fillStyle=acc+'22';ctx.fill();
+  ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(r,0);ctx.strokeStyle=acc+'cc';ctx.lineWidth=1.5;ctx.stroke();ctx.restore();
+  const rc=document.getElementById('radar-contacts');let rcHtml='';
+  radarContacts.forEach(c=>{
+    const diff=Math.abs(((c.angle-radarAngle)%(Math.PI*2)+Math.PI*2)%(Math.PI*2));
+    if(diff<0.15){c.visible=true;c.vt=30;}
+    if(c.vt>0){c.vt--;const px=cx+Math.cos(c.angle)*r*c.dist,py=cy+Math.sin(c.angle)*r*c.dist;const op=c.vt/30;ctx.beginPath();ctx.arc(px,py,4,0,Math.PI*2);ctx.fillStyle=c.hostile?`rgba(255,34,34,${op})`:`${acc}${Math.floor(op*255).toString(16).padStart(2,'0')}`;ctx.fill();ctx.fillStyle=c.hostile?`rgba(255,100,100,${op})`:`${acc}${Math.floor(op*.7*255).toString(16).padStart(2,'0')}`;ctx.font='7px Share Tech Mono';ctx.fillText(c.name,px+6,py-2);}
+    if(c.vt>0)rcHtml+=`<div class="radar-contact${c.hostile?' hostile':''}">${c.name} — ${c.hostile?'HOSTILE':'FRIENDLY'}</div>`;
+  });
+  if(rc)rc.innerHTML=rcHtml;radarAnim=requestAnimationFrame(()=>drawRadar(cv));
+}
+
+// ══ CAMS ══
+const CAM_LABELS=['CAM-01 ENTRANCE','CAM-02 LOBBY','CAM-03 SERVER ROOM','CAM-04 PERIMETER'];
+let camIVs=[];
+function buildCams(el){
+  el.innerHTML=`<div class="wchdr r"><span>SURVEILLANCE FEEDS — 4 CAMERAS ACTIVE</span><span>LIVE ●</span></div><div id="cams-grid"></div>`;
+  const grid=el.querySelector('#cams-grid');
+  CAM_LABELS.forEach((lbl,i)=>{const cell=document.createElement('div');cell.className='cam-cell';cell.innerHTML=`<canvas class="cam-canvas" id="cam-cv-${i}"></canvas><div class="cam-label">${lbl}</div><div class="cam-live">● REC</div>`;grid.appendChild(cell);setTimeout(()=>initCam(i),50+i*80);});
+}
+function initCam(i){
+  const cv=document.getElementById('cam-cv-'+i);if(!cv)return;
+  const cell=cv.parentElement;cv.width=cell.clientWidth||240;cv.height=cell.clientHeight||100;
+  const ctx=cv.getContext('2d');
+  const particles=Array(8).fill(0).map(()=>({x:Math.random()*cv.width,y:Math.random()*cv.height,vx:(Math.random()-.5)*.8,vy:(Math.random()-.5)*.4,size:Math.random()*6+2}));
+  const iv=setInterval(()=>{
+    if(!document.getElementById('cam-cv-'+i)){clearInterval(iv);return;}
+    ctx.fillStyle='rgba(0,4,0,.4)';ctx.fillRect(0,0,cv.width,cv.height);
+    for(let n=0;n<40;n++){ctx.fillStyle='rgba(0,180,0,'+(.02+Math.random()*.06)+')';ctx.fillRect(Math.random()*cv.width,Math.random()*cv.height,Math.random()*3,1);}
+    ctx.strokeStyle='rgba(0,60,0,.15)';ctx.lineWidth=.5;
+    for(let x=0;x<cv.width;x+=20){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,cv.height);ctx.stroke();}
+    for(let y=0;y<cv.height;y+=20){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(cv.width,y);ctx.stroke();}
+    particles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>cv.width)p.vx*=-1;if(p.y<0||p.y>cv.height)p.vy*=-1;ctx.fillStyle='rgba(0,255,65,.25)';ctx.fillRect(p.x,p.y,p.size,p.size*2.5);});
+    ctx.fillStyle='rgba(0,200,65,.6)';ctx.font='7px Share Tech Mono';ctx.fillText(new Date().toTimeString().slice(0,8),4,cv.height-4);
+    const scanY=(Date.now()/20)%cv.height;ctx.fillStyle='rgba(0,255,65,.06)';ctx.fillRect(0,scanY,cv.width,2);
+  },80);camIVs.push(iv);
+}
+
+// ══ CHAT ══
+const CHAT_MSGS=[{f:'agent_007@phantom',t:'handler@c2.gov',txt:'Package delivered. Awaiting extraction.',flag:false},{f:'unknown_443',t:'c2_server',txt:'Exfil complete — 42GB transferred. Wiping logs now.',flag:true},{f:'maria.k@shadow.net',t:'team_bravo',txt:'New coordinates: 48.85°N 2.35°E. Move at 0300.',flag:true},{f:'phantom_relay',t:'agent_007@phantom',txt:'Abort mission. Counter-intel active in sector 7.',flag:true},{f:'c2_server',t:'all_agents',txt:'Encryption key rotated. Update your tokens immediately.',flag:true},{f:'darknode_77',t:'market_admin',txt:'Shipment cleared customs. Awaiting payment.',flag:false}];
+function buildChat(el){
+  el.innerHTML=`<div class="wchdr p"><span>ENCRYPTED COMM INTERCEPTOR — TOR</span><span id="chat-flagged">0 FLAGGED</span></div><div class="wcbody" id="chat-feed"></div>`;
+  let flagged=0;const feed=el.querySelector('#chat-feed');
+  CHAT_MSGS.forEach((m,i)=>setTimeout(()=>{
+    if(!el.parentElement)return;const d=document.createElement('div');d.className='chatmsg'+(m.flag?' flag':'');
+    d.innerHTML=`<div class="chatmeta">${m.f} → ${m.t}</div><div class="chattext">${m.txt}</div>`;
+    feed.appendChild(d);feed.scrollTop=feed.scrollHeight;
+    if(m.flag){flagged++;const e=el.querySelector('#chat-flagged');if(e)e.textContent=flagged+' FLAGGED';notify('Chat Alert','Suspicious comm intercepted','r');}
+  },i*900+400));
+}
+
+// ══ CRYPTO ══
+const COINS=[{n:'Bitcoin',s:'BTC',b:67420},{n:'Ethereum',s:'ETH',b:3284},{n:'Monero',s:'XMR',b:163}];
+let crypIV=null,crypProfit=0;
+function buildCrypto(el){
+  el.innerHTML=`<div class="wchdr a"><span>CRYPTO MINING — 8×GPU CLUSTER</span><span id="crp-profit">PROFIT: $0.00</span></div><div class="wcbody"><div class="sg"><div class="sb"><div class="sl">GPU LOAD</div><div class="sv a" id="crp-gpu">0%</div><div class="pbar"><div class="pf a" id="crpb-g" style="width:0%"></div></div></div><div class="sb"><div class="sl">TEMP</div><div class="sv r" id="crp-tmp">0°C</div><div class="pbar"><div class="pf r" id="crpb-t" style="width:0%"></div></div></div></div><div id="coin-list"></div><div class="slbl">LIVE HASH STREAM</div><div id="hash-stream" style="font-size:7px;color:var(--acc3);word-break:break-all;line-height:1.5;height:50px;overflow:hidden;"></div></div>`;
+  startCrypto(el);
+}
+function startCrypto(el){
+  if(crypIV)clearInterval(crypIV);const cl=el.querySelector('#coin-list');
+  COINS.forEach(c=>{const d=document.createElement('div');d.className='coin-row';d.innerHTML=`<div><div class="cn">${c.s}</div><div style="font-size:7px;color:var(--acc3)">${c.n}</div></div><div style="text-align:right"><div class="cp" id="cp-${c.s}">$${c.b.toFixed(2)}</div><div class="cc up" id="cc-${c.s}">+0.00%</div></div><div style="text-align:right;font-size:8px;color:var(--acc3)">MINED: <span id="cm-${c.s}" style="color:var(--a)">0.000000</span></div>`;cl.appendChild(d);});
+  let gpu=80,tmp=72;const mined={BTC:0,ETH:0,XMR:0};
+  crypIV=setInterval(()=>{
+    gpu=Math.min(99,Math.max(70,gpu+(Math.random()-.45)*5));tmp=Math.min(95,Math.max(65,tmp+(Math.random()-.45)*4));
+    ['crp-gpu','crp-tmp','crpb-g','crpb-t'].forEach(id=>{const e=document.getElementById(id);if(!e)return;if(id==='crp-gpu'){e.textContent=gpu.toFixed(0)+'%';}else if(id==='crp-tmp'){e.textContent=tmp.toFixed(0)+'°C';}else if(id==='crpb-g')e.style.width=gpu.toFixed(0)+'%';else e.style.width=tmp.toFixed(0)+'%';});
+    COINS.forEach(c=>{const ch=(Math.random()-.48)*.5;const p=c.b*(1+ch/100);mined[c.s]+=0.0000015*Math.random();crypProfit+=mined[c.s]*p*.0001;['cp-'+c.s,'cc-'+c.s,'cm-'+c.s].forEach(id=>{const e=document.getElementById(id);if(!e)return;if(id.startsWith('cp'))e.textContent='$'+p.toFixed(2);else if(id.startsWith('cc')){e.textContent=(ch>0?'+':'')+ch.toFixed(3)+'%';e.className='cc '+(ch>0?'up':'dn');}else e.textContent=mined[c.s].toFixed(6);});});
+    const pp=document.getElementById('crp-profit');if(pp)pp.textContent='PROFIT: $'+crypProfit.toFixed(4);
+    const hs=document.getElementById('hash-stream');if(hs){const h=Array(64).fill(0).map(()=>'0123456789abcdef'[Math.floor(Math.random()*16)]).join('');hs.textContent=h+'\n'+(hs.textContent.split('\n').slice(0,6).join('\n'));}
+  },700);
+}
+
+// ══ SYSMON ══
+const PROCS=['phantom_agent.exe','tor_router.sys','vpn_aes256.ko','ai_scanner_v9.bin','exploit_loader.dll','net_monitor.sys','dna_engine.bin','signal_tracker.exe','stego_decoder.dll','crypto_miner.exe','face_id_engine','neural_net.ai','quantum_decrypt.dll'];
+function buildSysmon(el){
+  el.innerHTML=`<div class="wchdr"><span>SYSTEM MONITOR — LIVE DIAGNOSTICS</span><span id="sm-up">UP: 00:00:00</span></div><div class="wcbody"><div class="sg"><div class="sb"><div class="sl">CPU</div><div class="sv a" id="sm-cpu">73%</div><div class="pbar"><div class="pf a" id="smb-c" style="width:73%"></div></div></div><div class="sb"><div class="sl">RAM</div><div class="sv b" id="sm-ram">61%</div><div class="pbar"><div class="pf b" id="smb-r" style="width:61%"></div></div></div><div class="sb"><div class="sl">NETWORK</div><div class="sv g" id="sm-net">44%</div><div class="pbar"><div class="pf g" id="smb-n" style="width:44%"></div></div></div><div class="sb"><div class="sl">THREAT</div><div class="sv r" id="sm-thr">12%</div><div class="pbar"><div class="pf r" id="smb-t" style="width:12%"></div></div></div></div><div class="slbl">ACTIVE PROCESSES</div><div id="proc-list"></div><div class="slbl" style="margin-top:8px;">QUICK ACTIONS</div><div style="display:flex;flex-wrap:wrap;gap:4px;"><button class="abtn" onclick="triggerBreach()">💀 BREACH</button><button class="abtn" onclick="showDecrypt()">🔓 DECRYPT</button><button class="abtn r" onclick="startLockdown()">🔒 LOCKDOWN</button><button class="abtn r" onclick="triggerGovAlert()">🚨 GOV ALERT</button></div></div>`;
+  const pl=el.querySelector('#proc-list');PROCS.forEach(p=>{const d=document.createElement('div');d.textContent=`PID ${Math.floor(Math.random()*9000+1000)}  ${p}  ${(Math.random()*35+5).toFixed(1)}% CPU`;pl.appendChild(d);});
+  let cpu=73,ram=61,net=44,thr=12,up=0;
+  setInterval(()=>{
+    cpu=Math.min(99,Math.max(10,cpu+(Math.random()-.47)*10));ram=Math.min(99,Math.max(20,ram+(Math.random()-.48)*7));net=Math.min(99,Math.max(5,net+(Math.random()-.5)*14));thr=Math.min(99,Math.max(5,thr+(Math.random()-.48)*5));up++;
+    const h=Math.floor(up/3600),m=Math.floor((up%3600)/60),s=up%60;
+    [['sm-cpu','smb-c',cpu,'%'],['sm-ram','smb-r',ram,'%'],['sm-net','smb-n',net,'%'],['sm-thr','smb-t',thr,'%']].forEach(([v,b,val,u])=>{const ve=document.getElementById(v),be=document.getElementById(b);if(ve)ve.textContent=val.toFixed(0)+u;if(be)be.style.width=val.toFixed(0)+'%';});
+    const ue=document.getElementById('sm-up');if(ue)ue.textContent=`UP: ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  },900);
+}
+
+// ══ AI ══
+const AI_RESPONSES={
+  status:['All systems operational. 16 AI agents active. DNA scanner and voice interceptor online.','PHANTOM OS v9 running at full capacity. Signal tracker locked. TOR circuit stable.'],
+  scan:['Initiating deep network scan on primary target. Deploying stealth probes across all open ports.','Network topology mapped. Primary attack vectors identified.'],
+  default:['Processing your request through secure AI pipeline.','Acknowledged. Executing command through encrypted neural pathway.','Command received. Routing through 9-hop TOR circuit. Zero traces guaranteed.'],
+};
+function buildAI(el){
+  el.innerHTML=`<div class="wchdr p"><span>PHANTOM AI — CYBER ASSISTANT v9</span><span id="ai-status">ONLINE</span></div><div id="ai-log"></div><div id="ai-input-row"><input id="ai-cmd" type="text" placeholder="Ask PHANTOM AI anything..." autocomplete="off" spellcheck="false"/><button class="abtn" onclick="sendAI()">SEND</button></div>`;
+  aiMsg('ai','PHANTOM AI v9 online. New modules: DNA scanner, voice interceptor, steganography analyzer, signal tracker, and mission log. Type any command, operative.');
+  setTimeout(()=>{const inp=document.getElementById('ai-cmd');if(inp)inp.addEventListener('keydown',e=>{if(e.key==='Enter')sendAI();});},50);
+}
+function aiMsg(type,txt){
+  const log=document.getElementById('ai-log');if(!log)return;
+  const d=document.createElement('div');d.className='ai-msg '+type;
+  d.innerHTML=`<div class="ai-name">${type==='ai'?'◈ PHANTOM AI':'▶ OPERATIVE'}</div><div class="ai-text">${txt}</div>`;
+  log.appendChild(d);log.scrollTop=log.scrollHeight;
+}
+function sendAI(){
+  const inp=document.getElementById('ai-cmd');if(!inp)return;const txt=inp.value.trim();if(!txt)return;inp.value='';
+  aiMsg('user',txt);
+  const lower=txt.toLowerCase();let pool=AI_RESPONSES.default;
+  if(lower.includes('scan')||lower.includes('network'))pool=AI_RESPONSES.scan;
+  else if(lower.includes('status')||lower.includes('system'))pool=AI_RESPONSES.status;
+  const resp=pool[Math.floor(Math.random()*pool.length)];
+  const el=document.getElementById('ai-status');if(el)el.textContent='PROCESSING...';
+  setTimeout(()=>{aiMsg('ai',resp);voice(resp.split('.')[0]+'.');if(el)el.textContent='ONLINE';},700+Math.random()*600);
+}
+
+// ══ MODULES ══
+function buildModules(el){
+  el.innerHTML=`<div class="wchdr"><span>◈ CLASSIFIED MISSION MODULES</span><span>SELECT OPERATION</span></div><div class="wcbody"><div class="module-grid">
+    <div class="mcard" onclick="runModule('quantum')"><div class="mcard-icon">⚛️</div><div class="mcard-title">QUANTUM FIREWALL BREAKER</div><div class="mcard-desc">4096-qubit processor for real-time cryptanalysis of military-grade security.</div><span class="mcard-status ms-ready">READY</span></div>
+    <div class="mcard" onclick="runModule('neural')"><div class="mcard-icon">🧠</div><div class="mcard-title">NEURAL NETWORK ANALYZER</div><div class="mcard-desc">Deploy 16 autonomous AI agents to infiltrate target neural networks.</div><span class="mcard-status ms-ready">READY</span></div>
+    <div class="mcard" onclick="openApp('dna');runModule('dna2')"><div class="mcard-icon">🧬</div><div class="mcard-title">DNA BIO-SIGNATURE SCAN</div><div class="mcard-desc">Extract and sequence DNA profiles from biological sample data. Cross-reference classified bio-database.</div><span class="mcard-status ms-ready">READY</span></div>
+    <div class="mcard" onclick="openApp('voiceinterceptor')"><div class="mcard-icon">🎙️</div><div class="mcard-title">VOICE INTERCEPTOR</div><div class="mcard-desc">Real-time audio spectrum analysis. Voiceprint matching across 800M records.</div><span class="mcard-status ms-ready">READY</span></div>
+    <div class="mcard" onclick="openApp('stego');runModule('stego2')"><div class="mcard-icon">🖼️</div><div class="mcard-title">STEGANOGRAPHY DECODER</div><div class="mcard-desc">Extract hidden messages from image pixel LSB layers and audio frequencies.</div><span class="mcard-status ms-ready">READY</span></div>
+    <div class="mcard" onclick="openApp('signal')"><div class="mcard-icon">📻</div><div class="mcard-title">RF SIGNAL TRACKER</div><div class="mcard-desc">Triangulate RF signal sources across all bands. GPS lock in under 12 seconds.</div><span class="mcard-status ms-ready">READY</span></div>
+    <div class="mcard" onclick="openApp('typing')"><div class="mcard-icon">⌚</div><div class="mcard-title">OPERATIVE SPEED TEST</div><div class="mcard-desc">Prove your worth. Type classified strings at max speed. Only elite operatives pass.</div><span class="mcard-status ms-active">CHALLENGE</span></div>
+    <div class="mcard" onclick="startLockdown()"><div class="mcard-icon">🔒</div><div class="mcard-title">EMERGENCY LOCKDOWN</div><div class="mcard-desc">Full system security lockdown. All traces wiped. 30-second self-destruct.</div><span class="mcard-status ms-active">ARMED</span></div>
+  </div></div>`;
+}
+function runModule(type){
+  const msgs={
+    quantum:['Initializing 4096-qubit processor...','Quantum coherence: 99.7%...','RSA-2048 factored in 0.003 seconds','AES-256 bypassed via quantum interference','ALL FIREWALLS DISSOLVED'],
+    neural:['Spawning 16 autonomous AI agents...','Mapping neural topology: 2,847 nodes','Injecting adversarial payloads...','Poisoning training pipeline: 94%','AI NETWORK TAKEOVER COMPLETE'],
+    dna2:['Loading DNA analysis engine...','Sequencing genome — 3.2 billion base pairs...','Cross-referencing classified bio-database...','Matching allele frequencies...','DNA PROFILE CONFIRMED — 99.9% MATCH'],
+    stego2:['Analyzing image pixel LSB layers...','Scanning audio steganography channels...','Hidden data channels found: 7','Extracting concealed payload...','HIDDEN MESSAGE EXTRACTED SUCCESSFULLY'],
+  };
+  const steps=msgs[type]||msgs.quantum;
+  openApp('terminal');
+  (async()=>{
+    await tp(`\n> module_exec --type ${type} --stealth max`,'c');
+    for(let i=0;i<steps.length;i++)await tp(`  [${i+1}/${steps.length}] ${steps[i]}`,i===steps.length-1?'ok':'p',300+i*500);
+    showAccess(steps[steps.length-1],'Module execution successful');voice(steps[steps.length-1]);
+  })();
+}
+
+// ══════════════════════════════════════════
+// ══ NEW FEATURES ══
+// ══════════════════════════════════════════
+
+// ── DNA SCANNER ──
+const DNA_RESULTS=[
+  {id:'SUBJECT ALPHA — CLASSIFIED NSA FILE #7741',haplogroup:'H1a3',markers:'rs4988235, rs1800955, rs4911414',ancestry:'Eastern European — 47% / Central Asian — 31%',traits:'High intelligence markers, low pain sensitivity, night vision +14%'},
+  {id:'SUBJECT UNKNOWN — NO MATCH IN DATABASE',haplogroup:'R1b1a2',markers:'rs762551, rs1042522, rs17822931',ancestry:'Western European — 62% / North African — 22%',traits:'Enhanced stress response, above-average stamina, photographic memory markers'},
+  {id:'VIKTOR REZNOV — INTERPOL RED NOTICE',haplogroup:'N1c1',markers:'rs6152, rs1805007, rs12821256',ancestry:'Siberian — 54% / Scandinavian — 29%',traits:'Cold-weather adaptation, exceptional spatial reasoning, slow-twitch dominance'},
+];
+let dnaIV=null;
+function buildDNA(el){
+  el.innerHTML=`<div class="wchdr" style="border-bottom-color:rgba(0,200,100,.3);color:#00cc88;"><span>DNA SEQUENCER — BIO-SIGNATURE ANALYSIS v9</span><span id="dna-st">SEQUENCING</span></div>
+  <div id="dna-wrap">
+    <div id="dna-canvas-col"><canvas id="dna-cv"></canvas><div id="dna-sequence"></div></div>
+    <div id="dna-info">
+      <div class="slbl">BIO MARKERS</div>
+      <div id="dna-markers"></div>
+      <div class="slbl" style="margin-top:8px;">PROFILE</div>
+      <div id="dna-profile" style="font-size:7.5px;color:var(--acc3);line-height:1.9;"></div>
+      <button class="abtn" style="margin-top:8px;width:100%;" onclick="runDNAScan()">[ RESCAN SAMPLE ]</button>
+    </div>
+  </div>`;
+  setTimeout(()=>{initDNACanvas();runDNAScan();},50);
+}
+function initDNACanvas(){
+  const cv=document.getElementById('dna-cv');if(!cv)return;
+  const col=document.getElementById('dna-canvas-col');cv.width=col.clientWidth;cv.height=col.clientHeight-60;
+  drawDNAHelix(cv);
+}
+function drawDNAHelix(cv){
+  if(!document.getElementById('dna-cv'))return;
+  const ctx=cv.getContext('2d');const w=cv.width,h=cv.height;const acc=getAccentColor();
+  ctx.fillStyle='rgba(0,3,0,.3)';ctx.fillRect(0,0,w,h);
+  const t=Date.now()/1000;const cx=w/2;
+  for(let y=0;y<h;y+=3){
+    const wave=Math.sin(y*.05+t)*50;
+    const x1=cx+wave,x2=cx-wave;
+    const hue=Math.floor((y/h)*60);
+    ctx.beginPath();ctx.arc(x1,y,3,0,Math.PI*2);
+    ctx.fillStyle=`hsl(${120+hue},100%,${40+Math.sin(y*.1+t)*15}%)`;ctx.fill();
+    ctx.beginPath();ctx.arc(x2,y,3,0,Math.PI*2);
+    ctx.fillStyle=`hsl(${160+hue},80%,${35+Math.sin(y*.1+t+1)*15}%)`;ctx.fill();
+    if(y%24===0){ctx.beginPath();ctx.moveTo(x1,y);ctx.lineTo(x2,y);ctx.strokeStyle=acc+'44';ctx.lineWidth=1;ctx.stroke();}
+  }
+  // sequence ticker
+  const bases='ATCGATCGGCATCGTAGCATCGAAATGCCTAGCTTCGA';
+  ctx.font='7px Share Tech Mono';ctx.fillStyle=acc+'66';
+  bases.split('').forEach((b,i)=>{const color={A:acc,T:'#ff4444',C:'#4444ff',G:'#44ff44'}[b]||acc;ctx.fillStyle=color+'99';ctx.fillText(b,5+(i%8)*12,(Math.floor(i/8)+1)*12);});
+  requestAnimationFrame(()=>{if(document.getElementById('dna-cv'))drawDNAHelix(cv);});
+}
+function runDNAScan(){
+  const markers=document.getElementById('dna-markers'),profile=document.getElementById('dna-profile'),st=document.getElementById('dna-st'),seq=document.getElementById('dna-sequence');
+  if(!markers)return;markers.innerHTML='';profile.innerHTML='';if(st)st.textContent='SEQUENCING...';
+  const BASES='ATCG';let seqTxt='';
+  const seqIV=setInterval(()=>{seqTxt+=BASES[Math.floor(Math.random()*4)];if(seq)seq.textContent=seqTxt.slice(-120);if(seqTxt.length>600)clearInterval(seqIV);},40);
+  setTimeout(()=>{
+    const r=DNA_RESULTS[Math.floor(Math.random()*DNA_RESULTS.length)];
+    if(st)st.textContent='MATCHED';
+    [['IDENTITY',r.id],['HAPLOGROUP',r.haplogroup],['KEY MARKERS',r.markers]].forEach(([l,v])=>{const d=document.createElement('div');d.className='dna-marker';d.innerHTML=`${l}<br><span>${v}</span>`;markers.appendChild(d);});
+    if(profile)profile.innerHTML=`ANCESTRY: ${r.ancestry}<br><br>TRAITS: ${r.traits}`;
+    notify('DNA','Biological profile matched','g');voice('DNA sequencing complete. Subject identified.');
+  },3500);
+}
+
+// ── VOICE INTERCEPTOR ──
+let viIV=null;
+const VOICE_INTERCEPTS=[
+  {txt:'Package is ready for collection at grid reference Delta-7.',flagged:true,voice:'MALE — ID: PETROV_V'},
+  {txt:'The meeting is confirmed for oh-three-hundred hours.',flagged:true,voice:'FEMALE — ID: UNKNOWN'},
+  {txt:'Code word: PHANTOM. Proceed to extraction point alpha.',flagged:true,voice:'MALE — ID: AGENT-7'},
+  {txt:'Weather today is clear, twelve degrees. Have a nice day.',flagged:false,voice:'MALE — CIVILIAN'},
+  {txt:'Can you pick up some milk on the way home?',flagged:false,voice:'FEMALE — CIVILIAN'},
+  {txt:'Authorization code 7-7-BRAVO-SIERRA confirmed.',flagged:true,voice:'MALE — ID: HANDLER'},
+];
+function buildVoiceInterceptor(el){
+  el.innerHTML=`<div class="wchdr" style="border-bottom-color:rgba(204,0,255,.3);color:#aa00cc;"><span>VOICE INTERCEPTOR — 0-22kHz SPECTRUM</span><span id="vi-st">SCANNING</span></div>
+  <canvas id="vi-canvas"></canvas>
+  <div style="padding:4px 10px;background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);display:flex;gap:8px;font-size:7px;color:var(--acc3);flex-shrink:0;">
+    <span id="vi-freq">FREQ: --</span><span id="vi-db">dB: --</span><span id="vi-match">VOICEPRINT: SCANNING</span><span style="margin-left:auto;" id="vi-flagged">0 FLAGGED</span>
+  </div>
+  <div id="vi-log"></div>`;
+  setTimeout(()=>initVI(el),50);
+}
+function initVI(el){
+  const cv=document.getElementById('vi-canvas');if(!cv)return;
+  cv.width=el.clientWidth;cv.height=120;
+  let bars=Array(80).fill(0).map(()=>Math.random()*20);
+  let flagged=0,tick=0;
+  viIV=setInterval(()=>{
+    if(!document.getElementById('vi-canvas')){clearInterval(viIV);return;}
+    const ctx=cv.getContext('2d');const acc=getAccentColor();
+    ctx.fillStyle='rgba(0,3,0,.4)';ctx.fillRect(0,0,cv.width,cv.height);
+    bars=bars.map(b=>Math.max(3,Math.min(cv.height-4,b+(Math.random()-0.48)*18)));
+    const bw=cv.width/bars.length;
+    bars.forEach((h,i)=>{const x=i*bw;const hue=i/bars.length;ctx.fillStyle=`hsl(${140+hue*60},90%,${35+h/cv.height*30}%)`;ctx.fillRect(x,cv.height-h,bw-1,h);});
+    // Frequency grid
+    ctx.strokeStyle='rgba(0,150,80,.12)';ctx.lineWidth=.5;
+    for(let x=0;x<cv.width;x+=cv.width/8){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,cv.height);ctx.stroke();}
+    const freqEl=document.getElementById('vi-freq'),dbEl=document.getElementById('vi-db');
+    if(freqEl)freqEl.textContent='FREQ: '+(Math.random()*18+0.5).toFixed(1)+'kHz';
+    if(dbEl)dbEl.textContent='dB: '+(-(Math.floor(20+Math.random()*40)));
+    tick++;
+    // Random intercept
+    if(tick%120===0){
+      const ic=VOICE_INTERCEPTS[Math.floor(Math.random()*VOICE_INTERCEPTS.length)];
+      const log=document.getElementById('vi-log');if(!log)return;
+      const d=document.createElement('div');d.className='vi-entry'+(ic.flagged?' flagged':'');
+      d.innerHTML=`<span class="vt">${new Date().toTimeString().slice(0,8)} [${ic.voice}]</span><br>${ic.flagged?'⚠ ':''}${ic.txt}`;
+      log.appendChild(d);log.scrollTop=log.scrollHeight;
+      if(ic.flagged){flagged++;const fe=document.getElementById('vi-flagged');if(fe)fe.textContent=flagged+' FLAGGED';notify('Voice Alert','Suspicious communication flagged!','r');}
+      const vm=document.getElementById('vi-match');if(vm)vm.textContent='VOICEPRINT: '+(ic.flagged?'FLAGGED':'CLEAR');
+    }
+  },80);
+}
+
+// ── TYPING SPEED CHALLENGE ──
+const TC_STRINGS=[
+  'PHANTOM OS — CLASSIFIED LEVEL OMEGA CLEARANCE AUTHORIZED',
+  'rm -rf /var/log/* && shred -u /etc/passwd && exit 0',
+  'ssh -i phantom.key root@10.0.0.1 -p 22 -o StrictHostKeyChecking=no',
+  'GHOST PROTOCOL INITIATED — ABORT ALL TRACES — SELF DESTRUCT IN 30',
+  'nmap -sS -O -A --script=vuln 192.168.1.0/24 -T4 --open',
+  'openssl enc -aes-256-cbc -in classified.txt -out encrypted.dat -k PHANTOM9',
+];
+let tcState={target:'',typed:'',startTime:null,running:false,best:null};
+function buildTyping(el){
+  el.innerHTML=`<div class="wchdr"><span>OPERATIVE SPEED CHALLENGE — WPM TRACKER</span><span id="tc-level">LEVEL: ROOKIE</span></div>
+  <div id="tc-wrap">
+    <div style="font-size:7px;color:var(--acc3);letter-spacing:2px;margin-bottom:5px;">TYPE THE CLASSIFIED STRING AS FAST AS POSSIBLE:</div>
+    <div id="tc-target"></div>
+    <input id="tc-input" type="text" autocomplete="off" spellcheck="false" placeholder="Click here and start typing..." oninput="tcType(event)" onfocus="tcFocus()">
+    <div class="tc-stats">
+      <div class="sb"><div class="sl">WPM</div><div class="sv" id="tc-wpm" style="color:var(--a)">0</div></div>
+      <div class="sb"><div class="sl">ACCURACY</div><div class="sv" id="tc-acc" style="color:var(--acc)">100%</div></div>
+      <div class="sb"><div class="sl">BEST WPM</div><div class="sv" id="tc-best" style="color:var(--p)">--</div></div>
+      <div class="sb"><div class="sl">STATUS</div><div class="sv" id="tc-status" style="font-size:10px;color:var(--acc3)">READY</div></div>
+    </div>
+    <button class="abtn" style="width:100%;margin-top:8px;" onclick="tcNew()">[ NEW CHALLENGE ]</button>
+  </div>`;
+  setTimeout(tcNew,50);
+}
+function tcNew(){
+  tcState.target=TC_STRINGS[Math.floor(Math.random()*TC_STRINGS.length)];
+  tcState.typed='';tcState.running=false;tcState.startTime=null;
+  const inp=document.getElementById('tc-input');if(inp)inp.value='';
+  tcRender();
+  const st=document.getElementById('tc-status');if(st)st.textContent='READY';
+  const wpm=document.getElementById('tc-wpm');if(wpm)wpm.textContent='0';
+}
+function tcFocus(){if(!tcState.running&&tcState.typed===''){tcState.running=false;}}
+function tcType(e){
+  const v=e.target.value;tcState.typed=v;
+  if(!tcState.startTime&&v.length>0){tcState.startTime=Date.now();}
+  tcRender();
+  const elapsed=(Date.now()-tcState.startTime)/60000;
+  const words=tcState.typed.length/5;
+  const wpm=Math.floor(words/Math.max(elapsed,0.001));
+  const correct=tcState.typed.split('').filter((c,i)=>c===tcState.target[i]).length;
+  const acc=tcState.typed.length?Math.round(correct/tcState.typed.length*100):100;
+  const wpmEl=document.getElementById('tc-wpm'),accEl=document.getElementById('tc-acc');
+  if(wpmEl)wpmEl.textContent=wpm;if(accEl)accEl.textContent=acc+'%';
+  const lvl=document.getElementById('tc-level');
+  if(lvl)lvl.textContent='LEVEL: '+(wpm<30?'ROOKIE':wpm<60?'OPERATIVE':wpm<90?'ELITE':'◈ PHANTOM');
+  if(v===tcState.target){
+    tcState.running=false;
+    if(!tcState.best||wpm>tcState.best){tcState.best=wpm;const be=document.getElementById('tc-best');if(be)be.textContent=wpm;}
+    const st=document.getElementById('tc-status');if(st)st.textContent='COMPLETE ✓';
+    notify('Speed Challenge','Completed! '+wpm+' WPM — '+acc+'% accuracy','g');
+    voice('Challenge complete. '+wpm+' words per minute. Well done, operative.');
+    setTimeout(tcNew,2500);
+  }
+}
+function tcRender(){
+  const tgt=document.getElementById('tc-target');if(!tgt)return;
+  tgt.innerHTML=tcState.target.split('').map((c,i)=>{
+    let cls='tc-char';if(i<tcState.typed.length)cls+=tcState.typed[i]===c?' correct':' wrong';else if(i===tcState.typed.length)cls+=' current';
+    return `<span class="${cls}">${c}</span>`;
+  }).join('');
+}
+
+// ── MISSION LOG ──
+const MISSION_TEMPLATES=[
+  {title:'OPERATION PHANTOM VEIL',desc:'Infiltrate classified Pentagon subnet. Exfiltrate CORONA files. Leave zero traces. Deadline: 0600.',status:'active'},
+  {title:'OPERATION IRON GHOST',desc:'Identify and neutralize counter-intel operative in Berlin cell. GPS coordinates uploaded to Satellite array.',status:'active'},
+  {title:'OPERATION SILENT THUNDER',desc:'Intercept encrypted comms between Moscow relay and London handler. Decrypt and forward to command.',status:'complete'},
+  {title:'OPERATION RABBIT HOLE',desc:'Trace anonymous darknet transactions back to source IP. Identify the buyer. Do not engage.',status:'failed'},
+  {title:'OPERATION WINTER SHADOW',desc:'Deploy keylogger payload on 12 target systems across three continents. Activation on command.',status:'active'},
+  {title:'OPERATION ECLIPSE',desc:'Satellite override — redirect KH-14 reconnaissance array to monitor target compound for 48 hours.',status:'complete'},
+  {title:'OPERATION NEON WRAITH',desc:'Social engineering campaign against target organization. Craft deepfake audio for executive impersonation.',status:'active'},
+  {title:'OPERATION ACID RAIN',desc:'Mass phishing deployment targeting 4,000 government employee accounts. Harvest credentials.',status:'failed'},
+];
+let missions=[...MISSION_TEMPLATES.slice(0,4)];
+function buildMissions(el){
+  el.innerHTML=`<div class="wchdr a"><span>MISSION CONTROL — ACTIVE OPS LOG</span><span id="ml-count">0 ACTIVE</span></div>
+  <div id="ml-wrap"><div id="ml-list"></div><div id="ml-footer"><button class="abtn" onclick="addRandomMission()" style="flex:1">[ ADD MISSION ]</button><button class="abtn r" onclick="clearCompletedMissions()" style="flex:1">[ CLEAR DONE ]</button></div></div>`;
+  renderMissions();
+}
+function renderMissions(){
+  const list=document.getElementById('ml-list');if(!list)return;
+  list.innerHTML='';
+  missions.forEach((m,i)=>{
+    const d=document.createElement('div');d.className='mission-item '+m.status;
+    const statusLabel={active:'◈ ACTIVE',complete:'✓ COMPLETE',failed:'✕ FAILED'}[m.status];
+    const statusClass={active:'ms-a',complete:'ms-c',failed:'ms-f'}[m.status];
+    d.innerHTML=`<div class="mi-title"><span>${m.title}</span><span class="mi-status ${statusClass}">${statusLabel}</span></div><div class="mi-desc">${m.desc}</div><div style="display:flex;gap:5px;margin-top:6px;"><button class="abtn" style="font-size:7px;padding:2px 8px;" onclick="setMissionStatus(${i},'complete')">COMPLETE</button><button class="abtn r" style="font-size:7px;padding:2px 8px;" onclick="setMissionStatus(${i},'failed')">ABORT</button></div>`;
+    list.appendChild(d);
+  });
+  const cnt=document.getElementById('ml-count');if(cnt)cnt.textContent=missions.filter(m=>m.status==='active').length+' ACTIVE';
+}
+function setMissionStatus(i,status){missions[i].status=status;renderMissions();notify('Mission','Operation status updated: '+status.toUpperCase(),'a');}
+function addRandomMission(){
+  const t=MISSION_TEMPLATES[Math.floor(Math.random()*MISSION_TEMPLATES.length)];
+  missions.unshift({...t,status:'active',title:t.title+' '+Math.floor(Math.random()*9+1)});
+  renderMissions();notify('Mission Log','New classified operation assigned','a');voice('New mission added to operation log.');
+}
+function clearCompletedMissions(){missions=missions.filter(m=>m.status==='active');renderMissions();}
+
+// ── STEGANOGRAPHY ANALYZER ──
+let stegoIV=null;
+function buildStego(el){
+  el.innerHTML=`<div class="wchdr a"><span>STEGANOGRAPHY ANALYZER — HIDDEN DATA EXTRACTOR</span><span id="stego-st">IDLE</span></div>
+  <div id="stego-wrap">
+    <canvas id="stego-canvas" height="100"></canvas>
+    <div style="display:flex;gap:6px;margin-top:4px;">
+      <button class="abtn" onclick="runStegoScan('lsb')" style="flex:1">[ PIXEL LSB SCAN ]</button>
+      <button class="abtn" onclick="runStegoScan('meta')" style="flex:1">[ METADATA SCAN ]</button>
+      <button class="abtn" onclick="runStegoScan('freq')" style="flex:1">[ FREQ ANALYSIS ]</button>
+    </div>
+    <div class="slbl">HIDDEN DATA CHANNEL</div>
+    <div id="stego-reveal">No scan running. Select analysis mode.</div>
+    <div class="slbl">BIT STREAM ANALYSIS</div>
+    <div id="stego-bits" style="font-size:7px;color:var(--acc3);word-break:break-all;line-height:1.6;height:36px;overflow:hidden;"></div>
+  </div>`;
+  setTimeout(initStegoCanvas,50);
+}
+function initStegoCanvas(){
+  const cv=document.getElementById('stego-canvas');if(!cv)return;
+  const wrap=document.getElementById('stego-wrap');cv.width=wrap.clientWidth-20;cv.height=100;
+  drawStegoNoise(cv);
+}
+function drawStegoNoise(cv){
+  if(!document.getElementById('stego-canvas'))return;
+  const ctx=cv.getContext('2d');const w=cv.width,h=cv.height;const acc=getAccentColor();
+  ctx.fillStyle='rgba(0,3,0,.1)';ctx.fillRect(0,0,w,h);
+  for(let i=0;i<300;i++){const x=Math.random()*w,y=Math.random()*h;ctx.fillStyle=`rgba(0,${Math.floor(80+Math.random()*180)},0,${Math.random()*.4+.05})`;ctx.fillRect(x,y,2,2);}
+  ctx.strokeStyle=acc+'33';ctx.lineWidth=.5;
+  for(let x=0;x<w;x+=w/20){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}
+  requestAnimationFrame(()=>{if(document.getElementById('stego-canvas'))drawStegoNoise(cv);});
+}
+const HIDDEN_MSGS=[
+  '"MEET AT DEAD DROP SIGMA — 0300 UTC — DESTROY AFTER READING"',
+  '"ABORT OPERATION — COVER IS BLOWN — EXFIL IMMEDIATELY VIA ROUTE 7"',
+  '"LAUNCH CODES CONFIRMED: 7-7-BRAVO-SIERRA-PHANTOM — AUTHORIZE ALPHA"',
+  '"TARGET IDENTIFIED: CODENAME ORACLE — APARTMENT 4B, BUILDING 12, SECTOR 9"',
+  '"WIRE 2.4M USD TO ACCOUNT CH-93-0076-2011-6238-5 — CONFIRM RECEIPT"',
+];
+function runStegoScan(mode){
+  if(stegoIV)clearInterval(stegoIV);
+  const st=document.getElementById('stego-st'),rev=document.getElementById('stego-reveal'),bits=document.getElementById('stego-bits');
+  if(st)st.textContent='SCANNING...';if(rev)rev.textContent='Analyzing...';
+  const modeName={lsb:'LSB PIXEL LAYER',meta:'METADATA CHANNELS',freq:'FREQUENCY DOMAIN'}[mode];
+  let tick=0;
+  stegoIV=setInterval(()=>{
+    tick++;
+    const b=Array(64).fill(0).map(()=>Math.round(Math.random())).join('');
+    if(bits)bits.textContent=b+'\n'+(bits.textContent.split('\n').slice(0,3).join('\n'));
+    if(tick>30){clearInterval(stegoIV);const msg=HIDDEN_MSGS[Math.floor(Math.random()*HIDDEN_MSGS.length)];if(rev)rev.textContent=`[${modeName}] HIDDEN MESSAGE FOUND:\n${msg}`;if(st)st.textContent='FOUND';notify('Steganography','Hidden message extracted!','a');voice('Hidden message detected and extracted from image data.');}
+  },80);
+}
+
+// ── RF SIGNAL TRACKER ──
+let sigAnim=null;
+function buildSignal(el){
+  el.innerHTML=`<div class="wchdr" style="border-bottom-color:rgba(0,170,255,.3);color:#3399cc;"><span>RF SIGNAL TRACKER — TRIANGULATION ARRAY</span><span>LIVE</span></div>
+  <canvas id="sig-canvas"></canvas>
+  <div id="sig-footer">
+    <div><div class="cfl">FREQUENCY</div><div class="cfv" id="sig-f" style="font-size:9px">--</div></div>
+    <div><div class="cfl">SIGNAL dBm</div><div class="cfv" id="sig-db">--</div></div>
+    <div><div class="cfl">BEARING</div><div class="cfv" id="sig-b">--°</div></div>
+    <div><div class="cfl">DISTANCE</div><div class="cfv" id="sig-d">--</div></div>
+  </div>`;
+  setTimeout(initSignal,50);
+}
+function initSignal(){
+  const cv=document.getElementById('sig-canvas');if(!cv)return;
+  const p=cv.parentElement;cv.width=p.clientWidth;cv.height=p.clientHeight-70;
+  if(sigAnim)cancelAnimationFrame(sigAnim);drawSignal(cv);
+}
+let sigOffset=0;
+const SIG_BANDS=[{freq:'433.92MHz',color:'#00ff41',strength:0.8},{freq:'GSM 900MHz',color:'#ffaa00',strength:0.5},{freq:'WiFi 2.4GHz',color:'#00aaff',strength:1.0},{freq:'GPS L1',color:'#cc00ff',strength:0.3}];
+function drawSignal(cv){
+  if(!document.getElementById('sig-canvas')){sigAnim=null;return;}
+  const ctx=cv.getContext('2d');const w=cv.width,h=cv.height;
+  ctx.fillStyle='rgba(0,3,5,.3)';ctx.fillRect(0,0,w,h);
+  // Grid
+  ctx.strokeStyle='rgba(0,50,80,.2)';ctx.lineWidth=.5;
+  for(let y=0;y<h;y+=h/8){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
+  for(let x=0;x<w;x+=w/16){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}
+  // dB labels
+  ctx.fillStyle='rgba(0,150,200,.4)';ctx.font='7px Share Tech Mono';
+  [-20,-40,-60,-80,-100].forEach((db,i)=>{ctx.fillText(db+'dB',2,(i+1)*h/6);});
+  sigOffset+=2;
+  SIG_BANDS.forEach((band,bi)=>{
+    ctx.beginPath();ctx.strokeStyle=band.color;ctx.lineWidth=1.5;
+    for(let x=0;x<w;x+=2){
+      const noise=Math.random()*8;const sig=band.strength*Math.sin((x+sigOffset+bi*40)*.04)*Math.sin((x+sigOffset)*.012)*h*0.35+h/2;
+      if(x===0)ctx.moveTo(x,sig+noise);else ctx.lineTo(x,sig+noise);
+    }ctx.stroke();
+  });
+  // Spike (signal detected)
+  const spikeX=(sigOffset*1.3)%w;ctx.beginPath();ctx.moveTo(spikeX,h);ctx.lineTo(spikeX,h*0.1);ctx.strokeStyle='rgba(255,170,0,.9)';ctx.lineWidth=2;ctx.stroke();
+  ctx.fillStyle='rgba(255,170,0,.7)';ctx.font='7px Share Tech Mono';ctx.fillText('◄ SIGNAL LOCK',spikeX+3,20);
+  // Update footer
+  ['sig-f','sig-db','sig-b','sig-d'].forEach(id=>{const e=document.getElementById(id);if(!e)return;if(id==='sig-f')e.textContent=SIG_BANDS[Math.floor(sigOffset/100)%SIG_BANDS.length].freq;else if(id==='sig-db')e.textContent=(-Math.floor(30+Math.random()*50))+'dBm';else if(id==='sig-b')e.textContent=Math.floor(Math.random()*360)+'°';else e.textContent=(Math.random()*5+0.2).toFixed(2)+' km';});
+  sigAnim=requestAnimationFrame(()=>drawSignal(cv));
+}
+
+// ══ EXISTING MODALS & EFFECTS ══
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+function triggerBreach(){
+  const m=document.getElementById('m-breach');m.classList.add('show');
+  document.getElementById('bc-granted').style.display='none';document.getElementById('bc-btn').style.display='none';document.getElementById('bc-count').style.display='block';
+  const ce=document.getElementById('bc-code');
+  const ci=setInterval(()=>{if(!ce)return;const l=Array(50).fill(0).map(()=>'01アイウエ<>{}[]!@#$%'[Math.floor(Math.random()*18)]).join('');ce.textContent=ce.textContent.split('\n').slice(-5).join('\n')+'\n'+l;},60);
+  let cnt=5;document.getElementById('bc-count').textContent=cnt;
+  const cd=setInterval(()=>{cnt--;const e=document.getElementById('bc-count');if(e)e.textContent=cnt||'';if(cnt<=0){clearInterval(cd);clearInterval(ci);const bc=document.getElementById('bc-count'),bg=document.getElementById('bc-granted'),bb=document.getElementById('bc-btn');if(bc)bc.style.display='none';if(bg)bg.style.display='block';if(bb)bb.style.display='inline-block';}},1000);
+  playBeeps();voice('Warning. System breach detected. Firewall bypassed.');notify('BREACH','Firewall bypassed — intruder active','r');screenShake();
+}
+function showAccess(title,sub){
+  document.getElementById('m-access-sub').textContent=sub||'FULL ROOT ACCESS OBTAINED';
+  document.getElementById('m-access').classList.add('show');
+  const ce=document.getElementById('m-access-code');let txt='';
+  const iv=setInterval(()=>{txt+=Array(48).fill(0).map(()=>'01abcdef'[Math.floor(Math.random()*8)]).join('')+'\n';if(ce)ce.textContent=txt.split('\n').slice(-5).join('\n');},80);
+  setTimeout(()=>clearInterval(iv),3000);
+  notify('ACCESS GRANTED',title||'Root access obtained','g');
+}
+function showDecrypt(){
+  document.getElementById('m-decrypt').classList.add('show');
+  document.getElementById('dec-done').style.display='none';document.getElementById('dec-btn').style.display='none';
+  document.getElementById('dec-bar').style.width='0%';
+  const FILES=['classified_ops.aes256','nuclear_auth.vault','agent_manifest.pgp','comms_intercept.enc','dna_database.enc'];
+  let pct=0,fi=0;const ds=document.getElementById('dec-stream');
+  const iv=setInterval(()=>{
+    pct=Math.min(100,pct+(Math.random()*2+.5));const bar=document.getElementById('dec-bar');if(bar)bar.style.width=pct.toFixed(0)+'%';
+    const pe=document.getElementById('dec-p'),fe=document.getElementById('dec-f');
+    if(pe)pe.textContent=pct.toFixed(0)+'%';if(fe)fe.textContent=FILES[fi++%FILES.length];
+    if(ds){const h=Array(40).fill(0).map(()=>'0123456789abcdef'[Math.floor(Math.random()*16)]).join('');ds.textContent=h+'\n'+(ds.textContent.split('\n').slice(0,4).join('\n'));}
+    if(pct>=100){clearInterval(iv);const dd=document.getElementById('dec-done'),db=document.getElementById('dec-btn');if(dd)dd.style.display='block';if(db)db.style.display='inline-block';notify('Decryption','All files decrypted','g');voice('Decryption complete.');}
+  },75);
+  voice('Initiating quantum decryption.');
+}
+function triggerGovAlert(){
+  const m=document.getElementById('m-gov');m.classList.add('show');
+  document.getElementById('m-gov-box').style.animation='shake .3s infinite';
+  let txt='';const IPS=['192.168.1.','10.0.0.','172.16.0.'];
+  const iv=setInterval(()=>{txt+=`TRACE ${Date.now()}: ${IPS[Math.floor(Math.random()*3)]+Math.floor(Math.random()*255)} → LOCKED\n`;const e=document.getElementById('gov-trace');if(e)e.textContent=txt.split('\n').slice(-5).join('\n');},200);
+  setTimeout(()=>clearInterval(iv),12000);
+  voice('Federal alert. Signal trace initiated.');notify('GOV ALERT','Federal trace active','r');playLowTone();
+}
+
+let lockdownIV=null;
+function startLockdown(){
+  document.getElementById('lockdown-overlay').classList.add('show');
+  let cnt=30;document.getElementById('ld-count').textContent=cnt;document.getElementById('ld-bar').style.width='100%';
+  playBeeps();voice('Emergency lockdown. Self-destruct in 30 seconds.');
+  if(lockdownIV)clearInterval(lockdownIV);
+  lockdownIV=setInterval(()=>{cnt--;document.getElementById('ld-count').textContent=cnt;document.getElementById('ld-bar').style.width=(cnt/30*100)+'%';if(cnt<=0){clearInterval(lockdownIV);endLockdown();}},1000);
+}
+function endLockdown(){if(lockdownIV)clearInterval(lockdownIV);document.getElementById('lockdown-overlay').classList.remove('show');notify('Lockdown','Aborted — system stable','g');voice('Lockdown aborted.');}
+function screenShake(){document.getElementById('os').style.animation='shake .35s ease';setTimeout(()=>document.getElementById('os').style.animation=S.flicker?'flicker 10s infinite':'none',400);}
+
+function playBeeps(){
+  if(!S.sfx)return;try{const ac=new(window.AudioContext||window.webkitAudioContext)();function bip(f,d,w){const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.type='square';o.frequency.value=f;g.gain.setValueAtTime(S.vol*.12,w);g.gain.exponentialRampToValueAtTime(.001,w+d);o.start(w);o.stop(w+d);}[0,.12,.24,.36,.48,.6].forEach((t,i)=>bip(i%2===0?880:440,.1,ac.currentTime+t));}catch(e){}
+}
+function playLowTone(){if(!S.sfx)return;try{const ac=new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.type='sawtooth';o.frequency.value=80;g.gain.setValueAtTime(S.vol*.08,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+1.5);o.start();o.stop(ac.currentTime+1.5);}catch(e){}}
+
+function notify(title,msg,type='g'){
+  const c=document.getElementById('notif');const d=document.createElement('div');d.className='ni '+type;
+  d.innerHTML=`<div class="ni-t">${title}</div>${msg}`;
+  c.appendChild(d);setTimeout(()=>{d.style.opacity='0';d.style.transition='opacity .4s';setTimeout(()=>d.remove(),420);},4500);
+}
+
+if('speechSynthesis' in window)window.speechSynthesis.onvoiceschanged=()=>window.speechSynthesis.getVoices();
+function voice(txt){
+  const bar=document.getElementById('voice-bar'),vt=document.getElementById('vtxt');
+  if(!bar||!vt)return;vt.textContent=txt;bar.classList.add('show');
+  if(S.voice){try{if('speechSynthesis' in window){window.speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(txt);u.rate=.88;u.pitch=.7;u.volume=S.vol;const vs=window.speechSynthesis.getVoices();const pref=vs.find(v=>v.name.includes('David')||v.name.includes('Daniel')||v.name.includes('Alex'));if(pref)u.voice=pref;window.speechSynthesis.speak(u);}}catch(e){}}
+  setTimeout(()=>bar.classList.remove('show'),5000);
+}
+</script>
+</body>
+</html>
